@@ -2,12 +2,8 @@
 import React from "react";
 import apolloClient from "@/lib/apolloClient";
 import { ApolloProvider as GraphQlApolloProvider } from "@apollo/client";
-import { ThemeProvider, createTheme } from "@mui/material";
-const theme = createTheme({
-  palette: {
-    mode: "light",
-  },
-});
+import ThemeProvider from "./themeProvider";
+
 const ApolloProvider = ({
   children,
 }: Readonly<{
@@ -15,7 +11,7 @@ const ApolloProvider = ({
 }>) => {
   return (
     <GraphQlApolloProvider client={apolloClient}>
-      <ThemeProvider theme={theme}>{children}</ThemeProvider>
+      <ThemeProvider>{children}</ThemeProvider>
     </GraphQlApolloProvider>
   );
 };
