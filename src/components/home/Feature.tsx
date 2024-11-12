@@ -1,41 +1,81 @@
-import { Container, Grid, Typography, Box } from "@mui/material";
+"use client";
+import { Container, Typography, Box } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 import Image from "next/image";
-import busImage from "@/assests/busImage.jpg";
-const Feature = () => {
-  return (
-    <Container maxWidth="lg" sx={{ marginTop: 4 }}>
-      <Grid container spacing={4}>
-        {/* Text Section */}
-        <Grid item xs={12} md={7}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            'বামে প্লাস্টিক, সামনে পোকার': বাস হেলপারদের আরও যত সাংকেতিক
-            কথাবার্তা
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{ fontSize: "1.1rem", lineHeight: 1.8 }}
-          >
-            দিনে দিনে ঢাকার রাস্তায় গাড়ি বাড়ছিল, বাড়ছিল মানুষ। বাসের ভেতরে
-            আর বাইরে রাস্তার রাগঝাড়-মাঠি ও বাড়ছিল। ওস্তাদ ও হেলপারদের
-            চোক্ষ-কান। কালো প্লাস্টিক টানলেই বুঝা যাবে পাশের রিকশা, বামে
-            প্রাইভেট কার।
-          </Typography>
-        </Grid>
+import { useArticleStore } from "@/store/useArticleStore";
+import { useEffect } from "react";
+import NewsCard from "../common/newsCard";
+// Environment variable for API URL
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-        {/* Image Section */}
-        <Grid item xs={12} md={5}>
-          <Box sx={{ display: "flex", justifyContent: "center" }}>
+// Helper function to calculate hours since creation
+// Helper function to calculate time since creation
+const calculateTimeSince = (createdAt: string): string => {
+  const createdDate = new Date(createdAt);
+  const currentDate = new Date();
+  const differenceInMs = currentDate.getTime() - createdDate.getTime();
+
+  const seconds = Math.floor((differenceInMs / 1000) % 60);
+  const minutes = Math.floor((differenceInMs / (1000 * 60)) % 60);
+  const hours = Math.floor((differenceInMs / (1000 * 60 * 60)) % 24);
+  const days = Math.floor(differenceInMs / (1000 * 60 * 60 * 24));
+
+  if (days > 0) return `${days}d ${hours}h ago`;
+  if (hours > 0) return `${hours}h ${minutes}m ago`;
+  if (minutes > 0) return `${minutes}m ${seconds}s ago`;
+  return `${seconds}s ago`;
+};
+
+const Feature = () => {
+  const { articles, fetchArticles, loading } = useArticleStore(
+
+  );
+
+  useEffect(() => {
+    fetchArticles(); // Fetch only once on mount
+  }, [fetchArticles]);
+
+  if (loading) return <p>Loading....</p>;
+ const article = articles[0];
+  const coverUrl = article && article.cover ? `${API_URL}${article.cover.url}` : null;
+  const timeSinceCreated = article ? calculateTimeSince(article.createdAt) : "";
+  return (
+    <Container maxWidth="xl" sx={{ marginTop: 3, py:3}}>
+    <Grid container spacing={2} sx={{direction:{xs:"column", md:"row"}}}>
+
+      <Grid  size={{ xs: 12, md: 7}} sx={{position:"relative"}}>
+        <Typography variant="h3" component="h1" gutterBottom sx={{fontWeight:"bold"}}>
+        {article?.title}
+        </Typography>
+        <Typography
+          variant="body1"
+          sx={{ fontSize: "1.1rem", lineHeight: 1.8 , mb:3}}
+        >
+        {article?.description}
+        </Typography>
+        <Box sx={{position:"absolute", bottom:"0"}}>
+          {timeSinceCreated} | {article?.category?.name}
+        </Box>
+      </Grid>
+
+      <Grid size={{ xs: 12, md: 5}} sx={{ display: "flex", justifyContent: {xs:"center" ,lg:"flex-end" }}}>
+       
+      {coverUrl && (
             <Image
-              src={busImage}
-              alt="Bus Image"
+              src={coverUrl}
+              alt={article?.title || "Image"}
               width={500}
               height={300}
               style={{ maxWidth: "100%", height: "auto" }}
             />
-          </Box>
-        </Grid>
+          )}
       </Grid>
-    </Container>
+    </Grid>
+    {
+      !loading&&  
+    <NewsCard article={article}/>}
+  
+  </Container>
   );
 };
 
