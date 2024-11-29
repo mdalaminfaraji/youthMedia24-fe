@@ -1,4 +1,6 @@
 import Head from 'next/head'
+import NewsPage from './_NewsDetails'
+import { Container } from '@mui/material'
 
 interface NewsDetailsPageProps {
   params: {
@@ -27,11 +29,10 @@ const NewsDetailsPage = ({ params }: NewsDetailsPageProps) => {
           content={`Detailed news about ${decodedSlug}`}
         />
       </Head>
-      <div>
-        <h1>News Details</h1>
-        <p>Category: {category}</p>
-        <p>News Slug: {decodedSlug}</p>
-      </div>
+
+      <Container maxWidth="xl" sx={{ mt: { xs: 2, sm: 3 } }}>
+        <NewsPage />
+      </Container>
     </>
   )
 }

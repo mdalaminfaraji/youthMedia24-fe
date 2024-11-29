@@ -1,13 +1,12 @@
 'use client'
-import { Container, Typography, Box } from '@mui/material'
+import { Container, Typography, Box, Skeleton } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import Image from 'next/image'
 import { useArticleStore } from '@/store/useArticleStore'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-// Helper function to calculate hours since creation
 // Helper function to calculate time since creation
 const calculateTimeSince = (createdAt: string): string => {
   const createdDate = new Date(createdAt)
@@ -27,39 +26,119 @@ const calculateTimeSince = (createdAt: string): string => {
 
 const Feature = () => {
   const { articles, fetchArticles, loading } = useArticleStore()
+  const [imageLoaded, setImageLoaded] = useState(false)
 
   useEffect(() => {
     fetchArticles() // Fetch only once on mount
   }, [fetchArticles])
 
-  if (loading) return <p>Loading....</p>
   const article = articles[0]
   const coverUrl =
     article && article.cover ? `${API_URL}${article.cover.url}` : null
   const timeSinceCreated = article ? calculateTimeSince(article.createdAt) : ''
+
+  if (loading) {
+    return (
+      <Container
+        maxWidth="xl"
+        sx={{ mt: { xs: 2, sm: 3 }, py: { xs: 2, sm: 3 } }}
+      >
+        <Grid container spacing={{ xs: 2, sm: 3 }}>
+          <Grid size={{ xs: 12, md: 7 }}>
+            <Skeleton
+              variant="text"
+              sx={{ fontSize: '3rem', width: '80%', mb: 2 }}
+            />
+            <Skeleton
+              variant="text"
+              sx={{ fontSize: '1.1rem', width: '100%' }}
+            />
+            <Skeleton
+              variant="text"
+              sx={{ fontSize: '1.1rem', width: '90%' }}
+            />
+            <Skeleton
+              variant="text"
+              sx={{ fontSize: '1.1rem', width: '95%' }}
+            />
+            <Box sx={{ mt: 3 }}>
+              <Skeleton variant="text" sx={{ width: '200px' }} />
+            </Box>
+          </Grid>
+          <Grid size={{ xs: 12, md: 5 }}>
+            <Skeleton
+              variant="rectangular"
+              sx={{
+                width: '100%',
+                height: { xs: '200px', sm: '300px' },
+                borderRadius: 1,
+              }}
+            />
+          </Grid>
+        </Grid>
+      </Container>
+    )
+  }
+
   return (
-    <Container maxWidth="xl" sx={{ marginTop: 3, py: 3 }}>
+    <Container
+      maxWidth="xl"
+      sx={{
+        mt: { xs: 2, sm: 3 },
+        py: { xs: 2, sm: 3 },
+        // minHeight: { xs: '400px', sm: '500px', md:"auto" }
+      }}
+    >
       <Grid
         container
-        spacing={2}
-        sx={{ direction: { xs: 'column', md: 'row' } }}
+        spacing={{ xs: 2, sm: 3 }}
+        sx={{
+          flexDirection: { xs: 'column-reverse', md: 'row' },
+          alignItems: 'stretch',
+        }}
       >
-        <Grid size={{ xs: 12, md: 7 }} sx={{ position: 'relative' }}>
+        <Grid
+          size={{ xs: 12, md: 7 }}
+          sx={{
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
           <Typography
             variant="h3"
             component="h1"
             gutterBottom
-            sx={{ fontWeight: 'bold' }}
+            sx={{
+              fontWeight: 'bold',
+              fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
+              lineHeight: { xs: 1.3, sm: 1.2 },
+              mb: { xs: 2, sm: 3 },
+            }}
           >
             {article?.title}
           </Typography>
           <Typography
             variant="body1"
-            sx={{ fontSize: '1.1rem', lineHeight: 1.8, mb: 3 }}
+            sx={{
+              fontSize: { xs: '1rem', sm: '1.1rem' },
+              lineHeight: 1.8,
+              mb: { xs: 3, sm: 4 },
+              flex: 1,
+            }}
           >
             {article?.description}
           </Typography>
-          <Box sx={{ position: 'absolute', bottom: '0' }}>
+          <Box
+            sx={{
+              mt: 'auto',
+              pt: 2,
+              borderTop: '1px solid',
+              borderColor: 'divider',
+              color: 'text.secondary',
+              fontSize: { xs: '0.875rem', sm: '1rem' },
+            }}
+          >
             {timeSinceCreated} | {article?.category?.name}
           </Box>
         </Grid>
@@ -68,17 +147,44 @@ const Feature = () => {
           size={{ xs: 12, md: 5 }}
           sx={{
             display: 'flex',
-            justifyContent: { xs: 'center', lg: 'flex-end' },
+            justifyContent: 'center',
+            alignItems: 'flex-start',
           }}
         >
-          {coverUrl && (
-            <Image
-              src={coverUrl}
-              alt={article?.title || 'Image'}
-              width={600}
-              height={300}
-              style={{ maxWidth: '100%', height: 'auto' }}
+          {!imageLoaded && coverUrl && (
+            <Skeleton
+              variant="rectangular"
+              sx={{
+                width: '100%',
+                height: { xs: '200px', sm: '300px' },
+                borderRadius: 1,
+              }}
             />
+          )}
+          {coverUrl && (
+            <Box
+              sx={{
+                position: 'relative',
+                width: '100%',
+                height: { xs: '200px', sm: '300px' },
+                borderRadius: 1,
+                overflow: 'hidden',
+                display: imageLoaded ? 'block' : 'none',
+              }}
+            >
+              <Image
+                src={coverUrl}
+                alt={article?.title || 'Feature Image'}
+                fill
+                style={{
+                  objectFit: 'cover',
+                  maxWidth: '100%',
+                  height: '100%',
+                }}
+                onLoad={() => setImageLoaded(true)}
+                priority
+              />
+            </Box>
           )}
         </Grid>
       </Grid>

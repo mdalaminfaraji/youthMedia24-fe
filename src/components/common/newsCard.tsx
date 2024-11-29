@@ -4,12 +4,12 @@ import {
   CardContent,
   Typography,
   CardActionArea,
-  CardActions,
   Box,
+  Skeleton,
 } from '@mui/material'
 import Link from 'next/link'
-import { calculateTimeSince } from '../../../utils/calculateTime'
 import Image from 'next/image'
+import { calculateTimeSince } from '@/utils/calculateTime'
 
 interface Article {
   documentId?: string
@@ -26,97 +26,151 @@ interface NewsCardProps {
 }
 
 export default function NewsCard({ article }: NewsCardProps) {
-  const imageUrl = `${process.env.NEXT_PUBLIC_API_URL}${article?.cover?.url}`
+  const [imageLoaded, setImageLoaded] = React.useState(false)
+  const [imageError, setImageError] = React.useState(false)
+  const imageUrl = article?.cover?.url
+    ? `${process.env.NEXT_PUBLIC_API_URL}${article.cover.url}`
+    : ''
   const timeSinceCreated = article ? calculateTimeSince(article.createdAt) : ''
-  console.log(imageUrl)
-  console.log(article?.title)
+  console.log('Image URL:', imageUrl)
+
+  const handleImageLoad = () => {
+    console.log('Image loaded successfully')
+    setImageLoaded(true)
+  }
+
+  const handleImageError = () => {
+    console.log('Image failed to load')
+    setImageError(true)
+    setImageLoaded(true) // Hide skeleton on error
+  }
+
   return (
     <Card
       sx={{
-        width: { xs: '100%', md: 320, lg: 300, xl: 345 }, // Dynamically adjusts based on screen size
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
         mx: 'auto',
         boxShadow: 'none',
-        borderRadius: { xs: 2, sm: 3 },
+        borderRadius: { xs: 1, sm: 2 },
         backgroundColor: 'white',
+        transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: 3,
+        },
       }}
     >
       <Link
         href={`/articles/${article?.documentId}`}
-        style={{ textDecoration: 'none', color: 'inherit' }}
+        style={{
+          textDecoration: 'none',
+          color: 'inherit',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
         passHref
       >
-        <CardActionArea>
+        <CardActionArea
+          sx={{
+            flexGrow: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+          }}
+        >
           <Box
             sx={{
               width: '100%',
               overflow: 'hidden',
               position: 'relative',
               pt: '56.25%', // 16:9 aspect ratio
+              backgroundColor: 'grey.100',
+              borderRadius: { xs: 1, sm: 2 },
             }}
           >
-            {article && (
+            {!imageLoaded && (
+              <Skeleton
+                variant="rectangular"
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: 'inherit',
+                }}
+                animation="wave"
+              />
+            )}
+            {imageUrl && !imageError && (
               <Image
                 src={imageUrl}
                 fill
-                alt={article.title}
+                alt={article?.title || 'News Image'}
+                sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 33vw"
+                priority={false}
                 style={{
                   objectFit: 'cover',
                   width: '100%',
                   height: '100%',
                   position: 'absolute',
                 }}
+                onLoad={handleImageLoad}
+                onError={handleImageError}
               />
             )}
           </Box>
 
           <CardContent
             sx={{
-              textAlign: 'center',
               flexGrow: 1,
-              p: { xs: 2, sm: 3 },
-              maxHeight: '8rem', // Limits height to 6rem
-              overflow: 'hidden', // Ensures content does not extend beyond this height
-              display: '-webkit-box',
-              WebkitBoxOrient: 'vertical',
-              WebkitLineClamp: 3, // Show up to 3 lines of text, wrapping as needed
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              p: { xs: 1.5, sm: 2 },
+              '&:last-child': { pb: { xs: 1.5, sm: 2 } },
             }}
           >
             <Typography
-              gutterBottom
-              variant="h5"
-              component="div"
+              variant="h6"
+              component="h2"
               sx={{
-                fontSize: { xs: '1.2rem' },
-                fontWeight: 'bold',
+                fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' },
+                fontWeight: 600,
+                lineHeight: 1.4,
+                mb: 1,
+                overflow: 'hidden',
+                display: '-webkit-box',
+                WebkitBoxOrient: 'vertical',
+                WebkitLineClamp: 2,
+                minHeight: { xs: '2.8em', sm: '3em' },
               }}
             >
               {article?.title}
             </Typography>
+
+            <Box sx={{ mt: 'auto' }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
+                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  mt: 1,
+                }}
+              >
+                {timeSinceCreated} • {article?.category?.name}
+              </Typography>
+            </Box>
           </CardContent>
         </CardActionArea>
       </Link>
-
-      <CardActions sx={{ justifyContent: 'center', pb: { xs: 1, sm: 2 } }}>
-        <Typography
-          variant="caption"
-          component="span"
-          sx={{
-            fontSize: { xs: '0.75rem', sm: '0.875rem' }, // Adjust caption size based on screen
-            pl: 2,
-          }}
-        >
-          {timeSinceCreated} ago |{' '}
-          <Link
-            href={`/articles/${article?.category?.name}`}
-            style={{
-              textDecoration: 'none',
-              color: 'inherit',
-            }}
-          >
-            {article?.category?.name}
-          </Link>
-        </Typography>
-      </CardActions>
     </Card>
   )
 }
