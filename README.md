@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Youth Media 24 News Portal
 
-## Getting Started
+A modern news portal built with Next.js, Express.js, and MongoDB.
 
-First, run the development server:
+## Prerequisites
 
+Before running this project, make sure you have the following installed:
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- [Node.js](https://nodejs.org/) (for running backend locally)
+- [MongoDB](https://www.mongodb.com/try/download/community) (for local database)
+
+## Quick Start
+
+1. Start your local backend server and MongoDB first
+
+2. Clone the frontend repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <your-frontend-repo-url>
+cd youth-media-24-fe
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Create a `.env` file in the frontend directory:
+```env
+# For local development without Docker
+NEXT_PUBLIC_API_URL=http://localhost:1337
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# For Docker environment (will be overridden by docker-compose.yml)
+# NEXT_PUBLIC_API_URL=http://host.docker.internal:1337
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Build and run the frontend using Docker:
+```bash
+# For Linux users
+docker-compose up --build
 
-## Learn More
+# For Windows/Mac users (if the above doesn't work)
+DOCKER_DEFAULT_PLATFORM=linux/amd64 docker-compose up --build
+```
 
-To learn more about Next.js, take a look at the following resources:
+The application will be available at:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:1337 (your local backend)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Development
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+To run the frontend in development mode (without Docker):
 
-## Deploy on Vercel
+1. Install dependencies:
+```bash
+npm install
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2. Start the development server:
+```bash
+npm run dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Docker Commands
+
+Common Docker commands for managing the frontend:
+
+```bash
+# Start the frontend
+docker-compose up
+
+# Start in detached mode
+docker-compose up -d
+
+# Stop the frontend
+docker-compose down
+
+# View logs
+docker-compose logs -f
+
+# Rebuild the frontend
+docker-compose up --build
+
+# If you encounter any issues, try cleaning Docker cache
+docker system prune -a
+docker-compose build --no-cache
+```
+
+## Troubleshooting
+
+1. If the frontend can't connect to the backend:
+   - Ensure your backend server is running on port 1337
+   - Check if the NEXT_PUBLIC_API_URL in .env matches your backend URL
+   - For Docker: Make sure host.docker.internal resolves correctly
+   - Verify that your backend allows CORS requests from the frontend
+
+2. For Docker permission issues:
+   - Run Docker commands with sudo (Linux)
+   - Ensure Docker Desktop is running (Windows/Mac)
+
+3. For platform-specific issues:
+   - On M1/M2 Macs: Use DOCKER_DEFAULT_PLATFORM=linux/amd64
+   - On Windows: Ensure WSL2 is properly configured
+   - On Linux: Make sure docker and docker-compose are up to date
+
+## Project Structure
+
+```
+youth-media-24/
+├── frontend/                # Next.js frontend application
+│   ├── src/                # Source code
+│   ├── public/             # Static files
+│   └── Dockerfile         # Frontend Docker configuration
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
