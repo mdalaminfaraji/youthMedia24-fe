@@ -68,7 +68,7 @@ export default function CommentsSection({ articleId }: CommentsSectionProps) {
       setComment('')
     }
   }
-
+  console.log(articleId)
   return (
     <Box sx={{ mt: 6 }}>
       <Typography

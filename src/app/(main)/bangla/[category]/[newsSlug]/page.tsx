@@ -17,7 +17,7 @@ const NewsDetailsPage = ({ params }: NewsDetailsPageProps) => {
 
   console.log('Encoded Slug:', newsSlug)
   console.log('Decoded Slug:', decodedSlug)
-
+  console.log('Category:', category)
   return (
     <>
       <Head>
