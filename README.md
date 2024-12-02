@@ -96,6 +96,9 @@ docker system prune -a
 docker-compose build --no-cache
 ```
 
+## CI/CD Status
+This project is configured with GitHub Actions for CI/CD and automatically deploys to Vercel.
+
 ## Troubleshooting
 
 1. If the frontend can't connect to the backend:
