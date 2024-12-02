@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deployment Status - Youth Media 24</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        .loader {
+            width: 80px;
+            height: 80px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        h1 {
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+        }
+        p {
+            font-size: 1.2rem;
+            margin: 1rem 0;
+            line-height: 1.6;
+        }
+        .status {
+            font-weight: bold;
+            color: #4ade80;
+            font-size: 1.4rem;
+            margin: 1rem 0;
+        }
+        .info {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 1rem auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Youth Media 24</h1>
+        <div class="loader"></div>
+        <div class="status">Deployment in Progress</div>
+        <p>We're updating our website with the latest changes.</p>
+        <p>This usually takes about 2-3 minutes.</p>
+        <div class="info">
+            <p>This page will automatically redirect to the main site once deployment is complete.</p>
+            <p>If you're not redirected within 5 minutes, please refresh the page.</p>
+        </div>
+    </div>
+    <script>
+        // Check deployment status every 30 seconds
+        function checkDeployment() {
+            fetch('/')
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '/';
+                    }
+                })
+                .catch(() => {
+                    // If error, continue checking
+                    setTimeout(checkDeployment, 30000);
+                });
+        }
+
+        // Start checking after 60 seconds (giving time for initial deployment)
+        setTimeout(checkDeployment, 60000);
+    </script>
+</body>
+</html>
