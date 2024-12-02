@@ -10,12 +10,12 @@ export const metadata: Metadata = {
   title: 'Youth Media 24',
   description: 'Youth Media 24 - Your trusted source for news',
   icons: {
-    icon: '/youth24Logo.png',
-    shortcut: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
+    icon: '/favicon.png',
+    shortcut: '/favicon.png',
+    apple: '/favicon.png',
     other: {
-      rel: 'apple-touch-icon-precomposed',
-      url: '/apple-touch-icon-precomposed.png',
+      rel: 'apple-touch-icon',
+      url: '/favicon.png',
     },
   },
 }

@@ -5,6 +5,7 @@ A modern news portal built with Next.js, Express.js, and MongoDB.
 ## Prerequisites
 
 Before running this project, make sure you have the following installed:
+
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 - [Node.js](https://nodejs.org/) (for running backend locally)
@@ -15,12 +16,14 @@ Before running this project, make sure you have the following installed:
 1. Start your local backend server and MongoDB first
 
 2. Clone the frontend repository:
+
 ```bash
 git clone <your-frontend-repo-url>
 cd youth-media-24-fe
 ```
 
 3. Create a `.env` file in the frontend directory:
+
 ```env
 # For local development without Docker
 NEXT_PUBLIC_API_URL=http://localhost:1337
@@ -30,6 +33,7 @@ NEXT_PUBLIC_API_URL=http://localhost:1337
 ```
 
 4. Build and run the frontend using Docker:
+
 ```bash
 # For Linux users
 docker-compose up --build
@@ -39,6 +43,7 @@ DOCKER_DEFAULT_PLATFORM=linux/amd64 docker-compose up --build
 ```
 
 The application will be available at:
+
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:1337 (your local backend)
 
@@ -47,11 +52,13 @@ The application will be available at:
 To run the frontend in development mode (without Docker):
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
 
 2. Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -70,6 +77,14 @@ docker-compose up -d
 # Stop the frontend
 docker-compose down
 
+# Remove unused images
+docker system prune
+
+# Restart the container
+docker-compose restart
+
+# View running containers
+docker ps
 # View logs
 docker-compose logs -f
 
@@ -84,12 +99,14 @@ docker-compose build --no-cache
 ## Troubleshooting
 
 1. If the frontend can't connect to the backend:
+
    - Ensure your backend server is running on port 1337
    - Check if the NEXT_PUBLIC_API_URL in .env matches your backend URL
    - For Docker: Make sure host.docker.internal resolves correctly
    - Verify that your backend allows CORS requests from the frontend
 
 2. For Docker permission issues:
+
    - Run Docker commands with sudo (Linux)
    - Ensure Docker Desktop is running (Windows/Mac)
 
