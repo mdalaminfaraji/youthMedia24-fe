@@ -5,6 +5,12 @@ const nextConfig = {
     domains: ['localhost', 'i.ibb.co'],
     remotePatterns: [
       {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '1337',
+        pathname: '/**',
+      },
+      {
         protocol: 'https',
         hostname: '**',
       },

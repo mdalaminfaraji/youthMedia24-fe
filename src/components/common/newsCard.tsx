@@ -10,6 +10,7 @@ import {
 import Link from 'next/link'
 import Image from 'next/image'
 import { calculateTimeSince } from '@/utils/calculateTime'
+import { Cover } from '@/store/useArticleStore'
 
 interface Article {
   documentId?: string
@@ -17,7 +18,7 @@ interface Article {
   category: {
     name: string
   }
-  cover?: { url?: string }
+  cover?: Cover[]
   createdAt: string
 }
 
@@ -28,9 +29,10 @@ interface NewsCardProps {
 export default function NewsCard({ article }: NewsCardProps) {
   const [imageLoaded, setImageLoaded] = React.useState(false)
   const [imageError, setImageError] = React.useState(false)
-  const imageUrl = article?.cover?.url
-    ? `${process.env.NEXT_PUBLIC_API_URL}${article.cover.url}`
-    : ''
+  const imageUrl =
+    article && article.cover
+      ? `${process.env.NEXT_PUBLIC_API_URL}${article.cover[0].url}`
+      : ''
   const timeSinceCreated = article ? calculateTimeSince(article.createdAt) : ''
   console.log('Image URL:', imageUrl)
 
