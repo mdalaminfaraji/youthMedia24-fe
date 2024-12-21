@@ -15,13 +15,20 @@ import {
   Skeleton,
 } from '@mui/material'
 import { useState } from 'react'
+import useFetchArticlesByCategory from '@/hooks/useArticles'
+import { Cover } from '@/store/useArticleStore'
+import Link from 'next/link'
 
 // Types
 interface NewsItem {
-  category: string
+  documentId: string
+  description: string
   title: string
-  description?: string
-  image: string
+  banglaSlug: string
+  category: {
+    name: string
+  }
+  cover: Cover[]
 }
 
 // Components
@@ -37,137 +44,113 @@ const NewsCard = ({
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'))
 
   return (
-    <Card
-      sx={{
-        display: 'flex',
-        flexDirection: isFeatured && isLargeScreen ? 'row' : 'column',
-        width: '100%',
-        height: '100%',
-        transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: theme.shadows[4],
-        },
+    <Link
+      href={`/bangla/${item?.category?.name}/${item?.banglaSlug}`}
+      passHref
+      style={{
+        textDecoration: 'none',
+        color: 'inherit',
       }}
     >
-      {!imageLoaded && (
-        <Skeleton
-          variant="rectangular"
-          height={isFeatured ? 400 : 200}
-          animation="wave"
-        />
-      )}
-      <CardMedia
-        component="img"
-        image={item.image}
-        alt={item.title}
-        onLoad={() => setImageLoaded(true)}
+      <Card
         sx={{
-          width: isFeatured && isLargeScreen ? '50%' : '100%',
-          height: isFeatured ? (isLargeScreen ? 400 : 300) : 200,
-          display: imageLoaded ? 'block' : 'none',
-          objectFit: 'cover',
-        }}
-      />
-      <CardContent
-        sx={{
-          flex: 1,
-          p: theme.spacing(2),
           display: 'flex',
-          flexDirection: 'column',
-          gap: 1,
+          flexDirection: isFeatured && isLargeScreen ? 'row' : 'column',
+          width: '100%',
+          height: '100%',
+          transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+          '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: theme.shadows[4],
+          },
         }}
       >
-        <Typography variant="overline" color="primary" sx={{ fontWeight: 600 }}>
-          {item.category}
-        </Typography>
-        <Typography
-          variant={isFeatured ? 'h5' : 'h6'}
-          component="h2"
-          gutterBottom
+        {!imageLoaded && (
+          <Skeleton
+            variant="rectangular"
+            height={isFeatured ? 400 : 200}
+            animation="wave"
+          />
+        )}
+        <CardMedia
+          component="img"
+          image={`${process.env.NEXT_PUBLIC_API_URL}${item?.cover[0]?.url}`}
+          alt={item?.title}
+          onLoad={() => setImageLoaded(true)}
           sx={{
-            fontWeight: 700,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            display: '-webkit-box',
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical',
-            lineHeight: 1.4,
+            width: isFeatured && isLargeScreen ? '50%' : '100%',
+            height: isFeatured ? (isLargeScreen ? 400 : 300) : 200,
+            display: imageLoaded ? 'block' : 'none',
+            objectFit: 'cover',
+          }}
+        />
+        <CardContent
+          sx={{
+            flex: 1,
+            p: theme.spacing(2),
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 1,
           }}
         >
-          {item.title}
-        </Typography>
-        {item.description && (
           <Typography
-            variant="body1"
-            color="text.secondary"
+            variant="overline"
+            color="primary"
+            sx={{ fontWeight: 600 }}
+          >
+            {item?.category?.name}
+          </Typography>
+          <Typography
+            variant={isFeatured ? 'h5' : 'h6'}
+            component="h2"
+            gutterBottom
             sx={{
+              fontWeight: 700,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               display: '-webkit-box',
               WebkitLineClamp: 3,
               WebkitBoxOrient: 'vertical',
+              lineHeight: 1.4,
             }}
           >
-            {item.description}
+            <Link
+              href={`/bangla/${item?.category?.name}/${item?.banglaSlug}`}
+              passHref
+              style={{
+                textDecoration: 'none',
+                color: 'inherit',
+              }}
+            >
+              {item?.title}
+            </Link>
           </Typography>
-        )}
-      </CardContent>
-    </Card>
+          {item?.description && isFeatured && (
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical',
+              }}
+            >
+              {item?.description}
+            </Typography>
+          )}
+        </CardContent>
+      </Card>
+    </Link>
   )
 }
 
-export default function NewsPage() {
+export default function NewsPage({ category }: { category: string }) {
   const theme = useTheme()
-
-  const featuredNewsItems = [
-    {
-      category: 'বাংলাদেশ',
-      title:
-        'জুলাই গণহত্যায় বিচারে বাংলাদেশ চাইলে সহায়তা দিতে প্রস্তুত আন্তর্জাতিক অপরাধ আদালত',
-      description:
-        'কোর্ট প্রেফেরারি পরোয়ানা ইস্যু করবে কি-না জানতে চাইলে এসা মনাই এই জানান, "সবই তথ্য-প্রমাণের ভিত্তিতে আবেদন করা হয়। প্রধান কৌশলীর অফিস থেকে আবেদন করা হয়। প্রেফেরারি পরোয়ানা জারি না হওয়ায়...',
-      image: '/images/ict.jpg?height=400&width=600',
-    },
-    {
-      category: 'বাংলাদেশ',
-      title:
-        'যাত্রী সংকটে কাল সেপ্টেম্বরে যাচ্ছে না পটুয়াখালী জাহাজ, ১ ডিসেম্বর থেকে চলবে',
-      image: '/images/stmartin.jpg?height=200&width=300',
-    },
-    {
-      category: 'বাংলাদেশ',
-      title: 'দেশবাসীকে শুভ শারদীয় আশ্বিন প্রধান উপদেষ্টার',
-      image: '/placeholder.svg?height=200&width=300',
-    },
-  ]
-
-  const newsItems = [
-    {
-      category: 'বাংলাদেশ',
-      title:
-        'বিজেপি নেতার হুঙ্কির মধ্যে বেনাপোলে স্বাভাবিক ভাবে-বাংলাদেশ বাণিজ্য ও যাতায়াত',
-      image: '/placeholder.svg?height=200&width=300',
-    },
-    {
-      category: 'বাংলাদেশ',
-      title:
-        'নবায়নযোগ্য জ্বালানিভিত্তিক বিদ্যুৎ কোম্পানিকে ১০ বছর শুল্কছাড় কর অব্যাহতি দিলো সরকার',
-      image: '/placeholder.svg?height=200&width=300',
-    },
-    {
-      category: 'বাংলাদেশ',
-      title:
-        'আইনজীবী সাইফুল হত্যা: হত্যাকাণ্ডের বিচার ও ইনসাফ নিশ্চিতের দাবিতে দিনভর উত্তাল চট্টগ্রাম',
-      image: '/placeholder.svg?height=200&width=300',
-    },
-    {
-      category: 'বাংলাদেশ',
-      title:
-        'যমুনা নদীর উপর উভয়খণ্ডের অপেক্ষায় থাকা রেল সেতুর নাম পরিবর্তন হচ্ছে',
-      image: '/placeholder.svg?height=200&width=300',
-    },
-  ]
+  console.log(category)
+  const specificCategoryArticles = useFetchArticlesByCategory(category)
+  console.log(specificCategoryArticles)
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -220,9 +203,12 @@ export default function NewsPage() {
             mb: 4,
           }}
         >
-          <Box sx={{ height: '100%' }}>
-            <NewsCard item={featuredNewsItems[0]} isFeatured={true} />
-          </Box>
+          {specificCategoryArticles.length > 0 && (
+            <Box sx={{ height: '100%' }}>
+              <NewsCard item={specificCategoryArticles[0]} isFeatured={true} />
+            </Box>
+          )}
+
           <Box
             sx={{
               display: 'grid',
@@ -233,7 +219,7 @@ export default function NewsPage() {
               },
             }}
           >
-            {featuredNewsItems.slice(1).map((item, index) => (
+            {specificCategoryArticles?.slice(1, 3)?.map((item, index) => (
               <NewsCard key={index} item={item} />
             ))}
           </Box>
@@ -251,7 +237,7 @@ export default function NewsPage() {
             },
           }}
         >
-          {newsItems.map((item, index) => (
+          {specificCategoryArticles?.slice(3)?.map((item, index) => (
             <NewsCard key={index} item={item} />
           ))}
         </Box>

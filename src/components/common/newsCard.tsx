@@ -148,7 +148,7 @@ export default function NewsCard({ article }: NewsCardProps) {
                 overflow: 'hidden',
                 display: '-webkit-box',
                 WebkitBoxOrient: 'vertical',
-                WebkitLineClamp: 2,
+                WebkitLineClamp: 3,
                 minHeight: { xs: '2.8em', sm: '3em' },
               }}
             >

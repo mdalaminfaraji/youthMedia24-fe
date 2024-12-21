@@ -16,6 +16,7 @@ import ThemeToggleButton from '../ThemeToggleButton'
 import { useCategoryStore } from '@/store/categoriesStore'
 import Image from 'next/image'
 import logo from '@/assests/youth24Logo.png'
+import Link from 'next/link'
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout']
 
 function ResponsiveAppBar() {
@@ -70,7 +71,7 @@ function ResponsiveAppBar() {
           >
             YOUTHMEDIA24
           </Typography>
-          <ThemeToggleButton />
+          {/* <ThemeToggleButton /> */}
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
               size="large"
@@ -104,7 +105,12 @@ function ResponsiveAppBar() {
                   onClick={handleCloseNavMenu}
                 >
                   <Typography sx={{ textAlign: 'center' }}>
-                    {category?.name}
+                    <Link
+                      href={`/bangla/${category?.name}`}
+                      style={{ textDecoration: 'none', color: 'inherit' }}
+                    >
+                      {category?.name}
+                    </Link>
                   </Typography>
                 </MenuItem>
               ))}
@@ -139,7 +145,12 @@ function ResponsiveAppBar() {
                 onClick={handleCloseNavMenu}
                 sx={{ my: 2, color: 'white', display: 'block' }}
               >
-                {category?.name}
+                <Link
+                  href={`/bangla/${category?.name}`}
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  {category?.name}
+                </Link>
               </Button>
             ))}
           </Box>

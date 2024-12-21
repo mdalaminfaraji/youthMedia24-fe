@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react'
 import { useArticleStore } from '@/store/useArticleStore'
 import { Container, Box, Typography, Skeleton } from '@mui/material'
-import NewsCard from '../common/newsCard'
+import NewsCard from '@/components/common/newsCard'
 
 const LoadingSkeleton = () => (
   <Box sx={{ width: '100%' }}>
@@ -32,7 +32,7 @@ const CurrentNews = () => {
       maxWidth="xl"
       sx={{
         mt: { xs: 2, sm: 3, md: 4 },
-        // px: { xs: 2, sm: 3, md: 4 },
+        px: { xs: 2, sm: 3, md: 4 },
       }}
     >
       <Box
@@ -75,11 +75,7 @@ const CurrentNews = () => {
                 <Box
                   key={index}
                   sx={{
-                    flex: {
-                      xs: '1 1 100%', // 1 card per row on extra small screens
-                      sm: '1 1 calc(50% - 16px)', // 2 cards per row on small screens
-                      md: '1 1 calc(33.333% - 16px)', // 3 cards per row on medium and larger screens
-                    },
+                    flex: '1 1 calc(33.333% - 16px)',
                     boxSizing: 'border-box',
                     borderBottom: '1px dashed',
                     borderColor: 'divider',

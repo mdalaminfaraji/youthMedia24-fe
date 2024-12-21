@@ -1,10 +1,9 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import Navbar from '@/components/home/navbar'
 import ApolloProvider from '@/providers/clientProvider/apolloProvider'
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
 import ThemeProvider from '@/providers/clientProvider/themeProvider'
-import Footer from '@/components/common/Footer'
+import ScrollToTopButton from '@/components/common/ScrollToTopButton'
 
 export const metadata: Metadata = {
   title: 'Youth Media 24',
@@ -31,10 +30,8 @@ export default function RootLayout({
         <AppRouterCacheProvider>
           <ApolloProvider>
             <ThemeProvider>
-              {' '}
-              <Navbar />
               {children}
-              <Footer />
+              <ScrollToTopButton />
             </ThemeProvider>
           </ApolloProvider>
         </AppRouterCacheProvider>
