@@ -5,6 +5,8 @@ export const GET_ALL_ARTICLES = gql`
     articles(locale: $locale) {
       documentId
       description
+      isTreanding
+      banglaSlug
       cover {
         url
       }
@@ -23,6 +25,7 @@ export const GET_SINGLE_ARTICLES = gql`
       documentId
       title
       description
+      isTreanding
       content
       cover {
         url
@@ -49,6 +52,7 @@ export const GET_ARTICLES_WITH_SPECIFIC_CATEGORY = gql`
       documentId
       description
       banglaSlug
+      isTreanding
       cover {
         url
       }

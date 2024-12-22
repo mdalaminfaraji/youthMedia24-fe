@@ -3,6 +3,7 @@ import React, { useEffect } from 'react'
 import { useArticleStore } from '@/store/useArticleStore'
 import { Container, Box, Typography, Skeleton } from '@mui/material'
 import NewsCard from '@/components/common/newsCard'
+import Link from 'next/link'
 
 const LoadingSkeleton = () => (
   <Box sx={{ width: '100%' }}>
@@ -26,7 +27,7 @@ const CurrentNews = () => {
   useEffect(() => {
     fetchArticles()
   }, [fetchArticles])
-
+  console.log(articles)
   return (
     <Container
       maxWidth="xl"
@@ -127,7 +128,25 @@ const CurrentNews = () => {
               >
                 Trending News
               </Typography>
-              {/* Add your sidebar content here */}
+              <Box>
+                {articles.map((article, index) => {
+                  console.log(article)
+                  return (
+                    <Box key={index} sx={{ mb: 2 }}>
+                      {article?.category?.name &&
+                        article.banglaSlug &&
+                        article?.isTreanding && (
+                          <Link
+                            href={`/bangla/${article?.category?.name}/${article.banglaSlug}`}
+                            passHref
+                          >
+                            {article?.title}
+                          </Link>
+                        )}
+                    </Box>
+                  )
+                })}
+              </Box>
             </Box>
           )}
         </Box>

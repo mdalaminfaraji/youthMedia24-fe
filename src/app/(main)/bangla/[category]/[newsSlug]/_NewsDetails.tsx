@@ -17,8 +17,6 @@ import CommentsSection from '@/components/news/CommentsSection'
 import { useArticleStore } from '@/store/useArticleStore'
 import { useEffect } from 'react'
 
-import 'draft-js/dist/Draft.css'
-
 import BlockRendererClient from '@/components/BlockRenderer'
 interface NewsParams {
   newsSlug: string
@@ -26,13 +24,13 @@ interface NewsParams {
 }
 
 export default function NewsPage({ newsSlug, newsCategory }: NewsParams) {
-  console.log('News Slug:', newsSlug)
+  // console.log('News Slug:', newsSlug)
   console.log('News Category:', newsCategory)
   const { newsDetails, fetchNewsDetails, loading } = useArticleStore()
   useEffect(() => {
     fetchNewsDetails(newsSlug)
   }, [fetchNewsDetails, newsSlug])
-  console.log(newsDetails)
+  // console.log(newsDetails)
   const shareButtons = [
     { icon: <Facebook />, color: '#3b5998', label: 'Share on Facebook' },
     { icon: <Twitter />, color: '#1DA1F2', label: 'Share on Twitter' },

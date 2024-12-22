@@ -15,6 +15,7 @@ import { Cover } from '@/store/useArticleStore'
 interface Article {
   documentId?: string
   title: string
+  banglaSlug: string
   category: {
     name: string
   }
@@ -66,7 +67,8 @@ export default function NewsCard({ article }: NewsCardProps) {
       }}
     >
       <Link
-        href={`/articles/${article?.documentId}`}
+        href={`/bangla/${article?.category?.name}/${article?.banglaSlug}`}
+        passHref
         style={{
           textDecoration: 'none',
           color: 'inherit',
@@ -74,7 +76,6 @@ export default function NewsCard({ article }: NewsCardProps) {
           display: 'flex',
           flexDirection: 'column',
         }}
-        passHref
       >
         <CardActionArea
           sx={{

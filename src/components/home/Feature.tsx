@@ -4,6 +4,7 @@ import Grid from '@mui/material/Grid2'
 import Image from 'next/image'
 import { useArticleStore } from '@/store/useArticleStore'
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -115,9 +116,22 @@ const Feature = () => {
               fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
               lineHeight: { xs: 1.3, sm: 1.2 },
               mb: { xs: 2, sm: 3 },
+              cursor: 'pointer',
+              opacity: 1,
+              '&:hover': { opacity: 0.8 },
             }}
           >
-            {article?.title}
+            <Link
+              href={`/bangla/${article?.category?.name}/${article?.banglaSlug}`}
+              passHref
+              style={{
+                textDecoration: 'none',
+                color: 'inherit',
+              }}
+            >
+              {' '}
+              {article?.title}
+            </Link>
           </Typography>
           <Typography
             variant="body1"
@@ -140,7 +154,14 @@ const Feature = () => {
               fontSize: { xs: '0.875rem', sm: '1rem' },
             }}
           >
-            {timeSinceCreated} | {article?.category?.name}
+            {timeSinceCreated} |{' '}
+            <Link
+              href={`/bangla/${article?.category?.name}`}
+              passHref
+              style={{ textDecoration: 'none', color: 'inherit' }}
+            >
+              {article?.category?.name}
+            </Link>
           </Box>
         </Grid>
 

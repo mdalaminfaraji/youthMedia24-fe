@@ -1,8 +1,8 @@
 import { Metadata } from 'next'
 import NewsPage from './_NewsDetails'
 import { Container } from '@mui/material'
-import apolloClient from '@/lib/apolloClient'
-import { GET_ARTICLES_BY_BANGLA_SLUG } from '@/graphql/queries/articles'
+// import apolloClient from '@/lib/apolloClient'
+// import { GET_ARTICLES_BY_BANGLA_SLUG } from '@/graphql/queries/articles'
 
 interface NewsDetailsPageProps {
   params: {
@@ -43,18 +43,17 @@ const NewsDetailsPage = async ({ params }: NewsDetailsPageProps) => {
   // Decode the encoded newsSlug and category
   const decodedSlug = decodeURIComponent(newsSlug)
   const decodedCategory = decodeURIComponent(category)
-  const { data } = await apolloClient.query({
-    query: GET_ARTICLES_BY_BANGLA_SLUG,
-    variables: {
-      locale: 'bn',
-      filters: {
-        banglaSlug: {
-          contains: decodedSlug,
-        },
-      },
-    },
-  })
-  console.log('data:', data.articles)
+  // const { data } = await apolloClient.query({
+  //   query: GET_ARTICLES_BY_BANGLA_SLUG,
+  //   variables: {
+  //     locale: 'bn',
+  //     filters: {
+  //       banglaSlug: {
+  //         contains: decodedSlug,
+  //       },
+  //     },
+  //   },
+  // })
 
   return (
     <Container maxWidth="xl" sx={{ mt: { xs: 2, sm: 3 } }}>

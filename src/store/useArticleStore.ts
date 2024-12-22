@@ -15,6 +15,8 @@ export interface Cover {
 interface Article {
   documentId: string
   description: string
+  banglaSlug: string
+  isTreanding: boolean
   cover: Cover[]
   createdAt: string
   title: string
