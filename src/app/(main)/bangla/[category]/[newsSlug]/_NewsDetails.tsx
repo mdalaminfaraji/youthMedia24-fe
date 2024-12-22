@@ -1,3 +1,4 @@
+'use client'
 import Image from 'next/image'
 import {
   Box,
@@ -13,8 +14,25 @@ import {
 } from '@mui/material'
 import { Facebook, Twitter, WhatsApp, Email } from '@mui/icons-material'
 import CommentsSection from '@/components/news/CommentsSection'
+import { useArticleStore } from '@/store/useArticleStore'
+import { useEffect } from 'react'
 
-export default function NewsPage() {
+import 'draft-js/dist/Draft.css'
+
+import BlockRendererClient from '@/components/BlockRenderer'
+interface NewsParams {
+  newsSlug: string
+  newsCategory: string
+}
+
+export default function NewsPage({ newsSlug, newsCategory }: NewsParams) {
+  console.log('News Slug:', newsSlug)
+  console.log('News Category:', newsCategory)
+  const { newsDetails, fetchNewsDetails, loading } = useArticleStore()
+  useEffect(() => {
+    fetchNewsDetails(newsSlug)
+  }, [fetchNewsDetails, newsSlug])
+  console.log(newsDetails)
   const shareButtons = [
     { icon: <Facebook />, color: '#3b5998', label: 'Share on Facebook' },
     { icon: <Twitter />, color: '#1DA1F2', label: 'Share on Twitter' },
@@ -54,6 +72,9 @@ export default function NewsPage() {
     },
   ]
 
+  if (loading) {
+    return <Box>Loading.....</Box>
+  }
   return (
     <Box
       sx={{
@@ -182,7 +203,7 @@ export default function NewsPage() {
               lineHeight: 1.2,
             }}
           >
-            জুলাই গণহত্যার বিচারে বাংলাদেশকে সহায়তা দিতে প্রস্তুত আইসিসি
+            {newsDetails[0]?.title}
           </Typography>
 
           <Box
@@ -201,7 +222,6 @@ export default function NewsPage() {
             </Typography>
           </Box>
 
-          {/* Social Share Buttons */}
           <Box
             sx={{
               display: 'flex',
@@ -229,48 +249,34 @@ export default function NewsPage() {
               </IconButton>
             ))}
           </Box>
+          {newsDetails[0]?.cover[0].url && (
+            <Box
+              sx={{
+                position: 'relative',
+                width: '100%',
+                height: { xs: 250, sm: 350, md: 400 },
+                my: 3,
+                borderRadius: 2,
+                overflow: 'hidden',
+              }}
+            >
+              <Image
+                src={`${process.env.NEXT_PUBLIC_API_URL}${newsDetails[0]?.cover[0].url}`}
+                alt="News article main image"
+                fill
+                style={{ objectFit: 'cover' }}
+                sizes="(max-width: 600px) 100vw, (max-width: 960px) 75vw, 1200px"
+              />
+            </Box>
+          )}
 
-          {/* Main Image */}
-          <Box
-            sx={{
-              position: 'relative',
-              width: '100%',
-              height: { xs: 250, sm: 350, md: 400 },
-              my: 3,
-              borderRadius: 2,
-              overflow: 'hidden',
-            }}
-          >
-            <Image
-              src="/images/ict.jpg"
-              alt="News article main image"
-              fill
-              style={{ objectFit: 'cover' }}
-              sizes="(max-width: 600px) 100vw, (max-width: 960px) 75vw, 1200px"
-            />
-          </Box>
-
-          {/* Article Content */}
-          <Box sx={{ fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.8 }}>
-            <Typography variant="body1" paragraph>
-              কোর্ট প্রেফেরারি পরোয়ানা ইস্যু করবে কি-না জানতে চাইলে এসা মনাই এই
-              জানান, সবই তথ্য-প্রমাণের ভিত্তিতে আবেদন করা হয়। প্রধান কৌশলির
-              অফিস থেকে আবেদন করা হবে প্রেফেরারি পরোয়ানা জারি না হওয়ায়।
-            </Typography>
-
-            <Typography variant="body1" paragraph>
-              আন্তর্জাতিক ফৌজদারি আদালতের প্রধান কৌশলি করিম খানের ঢাকা সফর শেষে
-              সিনিয়র ট্রায়াল আইনজীবী এসা মনাই এই সংবাদ সন্মেলন করেন।
-            </Typography>
-
-            <Typography variant="body1" paragraph>
-              তিনি বলেন, যদি কোনও দেশ চায়- তবে আন্তর্জাতিক অপরাধ আদালত কারিগরি
-              সহায়তা, প্রশিক্ষণ বা দিকনির্দেশনা দিতে সবসময় প্রস্তুত আছে।
-              আদালতের প্রধান কৌশলি বাংলাদেশের কাছ থেকে অনেক সহায়তা পেয়েছেন।
-              বাংলাদেশ সহায়তা না করলে, আমাদের পক্ষে একাকী কাজ করা দুরূহ ছিল।
-              বর্তমানে আমরা একটি নতুন মামলার জন্য প্রস্তুতি নিচ্ছি।
-            </Typography>
-          </Box>
+          {newsDetails[0]?.content && (
+            <Box
+              sx={{ fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.8 }}
+            >
+              <BlockRendererClient content={newsDetails[0]?.content} />
+            </Box>
+          )}
         </Paper>
         <CommentsSection />
       </Box>
