@@ -18,6 +18,7 @@ import { useArticleStore } from '@/store/useArticleStore'
 import { useEffect } from 'react'
 
 import BlockRendererClient from '@/components/BlockRenderer'
+
 interface NewsParams {
   newsSlug: string
   newsCategory: string
@@ -25,17 +26,56 @@ interface NewsParams {
 
 export default function NewsPage({ newsSlug, newsCategory }: NewsParams) {
   // console.log('News Slug:', newsSlug)
+
+  // Dynamically get the current URL
+  const getNewsUrl = () => {
+    if (typeof window !== 'undefined') {
+      return `${window.location.origin}${window.location.pathname}`
+    }
+    return ''
+  }
   console.log('News Category:', newsCategory)
   const { newsDetails, fetchNewsDetails, loading } = useArticleStore()
   useEffect(() => {
     fetchNewsDetails(newsSlug)
   }, [fetchNewsDetails, newsSlug])
   // console.log(newsDetails)
+  const newsUrl = getNewsUrl() // Replace with your actual news URL
+  const newsTitle = newsSlug // Customize the news title for social sharing
+
   const shareButtons = [
-    { icon: <Facebook />, color: '#3b5998', label: 'Share on Facebook' },
-    { icon: <Twitter />, color: '#1DA1F2', label: 'Share on Twitter' },
-    { icon: <WhatsApp />, color: '#25D366', label: 'Share on WhatsApp' },
-    { icon: <Email />, color: '#EA4335', label: 'Share via Email' },
+    {
+      icon: <Facebook />,
+      color: '#3b5998',
+      label: 'Share on Facebook',
+      url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+        newsUrl
+      )}`,
+    },
+    {
+      icon: <Twitter />,
+      color: '#1DA1F2',
+      label: 'Share on Twitter',
+      url: `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+        newsUrl
+      )}&text=${encodeURIComponent(newsTitle)}`,
+    },
+    {
+      icon: <WhatsApp />,
+      color: '#25D366',
+      label: 'Share on WhatsApp',
+      url: `https://wa.me/?text=${encodeURIComponent(
+        newsTitle
+      )}%20${encodeURIComponent(newsUrl)}`,
+    },
+    {
+      icon: <Email />,
+      color: '#EA4335',
+      label: 'Share via Email',
+      url: `mailto:?subject=${encodeURIComponent(
+        newsTitle
+      )}&body=${encodeURIComponent(newsUrl)}`,
+    },
   ]
 
   const relatedNews = [
@@ -72,6 +112,9 @@ export default function NewsPage({ newsSlug, newsCategory }: NewsParams) {
 
   if (loading) {
     return <Box>Loading.....</Box>
+  }
+  const handleShare = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer')
   }
   return (
     <Box
@@ -232,6 +275,7 @@ export default function NewsPage({ newsSlug, newsCategory }: NewsParams) {
               <IconButton
                 key={index}
                 aria-label={button.label}
+                onClick={() => handleShare(button.url)}
                 sx={{
                   backgroundColor: button.color,
                   color: 'white',

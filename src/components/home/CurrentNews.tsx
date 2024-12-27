@@ -92,7 +92,7 @@ const CurrentNews = () => {
                   },
                 }}
               >
-                {!article?.isTreanding && <NewsCard article={article} />}
+                <NewsCard article={article} />
               </Box>
             ))}
           </Box>
