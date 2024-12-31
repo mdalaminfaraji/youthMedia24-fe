@@ -4,6 +4,7 @@ import {
   GET_ALL_ARTICLES,
   GET_ARTICLES_BY_BANGLA_SLUG,
   GET_ARTICLES_WITH_SPECIFIC_CATEGORY,
+  GET_SINGLE_ARTICLES,
 } from '@/graphql/queries/articles'
 import apolloClient from '@/lib/apolloClient'
 import { create } from 'zustand'
@@ -58,12 +59,14 @@ interface ArticleStore {
   articles: Article[]
   specificCategoryArticles: SpecificArticleByCategory[]
   newsDetails: NewsDetails[]
+  specificArticle: NewsDetails | null
   loading: boolean
   error: string | null
   locale: string
   fetchArticles: (locale?: string) => Promise<void>
   fetchArticleByCategory: (category: string) => Promise<void>
   fetchNewsDetails: (slug: string) => Promise<void>
+  fetchArticleByDocumentId: (documentId: string) => Promise<void>
 }
 
 export const useArticleStore = create<ArticleStore>((set, get) => ({
@@ -72,7 +75,22 @@ export const useArticleStore = create<ArticleStore>((set, get) => ({
   newsDetails: [],
   loading: false,
   error: null,
+  specificArticle: null,
   locale: 'bn',
+  fetchArticleByDocumentId: async (documentId: string) => {
+    set({ loading: true, error: null })
+
+    try {
+      const { data } = await apolloClient.query({
+        query: GET_SINGLE_ARTICLES,
+        variables: { documentId },
+      })
+      const article = data.article
+      set({ specificArticle: article, loading: false })
+    } catch (err: any) {
+      set({ error: err.message, loading: false })
+    }
+  },
   fetchNewsDetails: async (slug: string) => {
     set({ loading: true, error: null })
 

@@ -67,7 +67,7 @@ export default function NewsCard({ article }: NewsCardProps) {
       }}
     >
       <Link
-        href={`/bangla/${article?.category?.name}/${article?.banglaSlug}`}
+        href={`/bangla/${article?.category?.name}/${article?.banglaSlug}?documentId=${article?.documentId}`}
         passHref
         style={{
           textDecoration: 'none',

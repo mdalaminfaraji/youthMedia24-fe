@@ -20,25 +20,28 @@ export const GET_ALL_ARTICLES = gql`
 `
 
 export const GET_SINGLE_ARTICLES = gql`
-  query Article($locale: I18NLocaleCode, $documentId: ID!) {
-    article(locale: $locale, documentId: $documentId) {
+  query Article($documentId: ID!) {
+    article(documentId: $documentId) {
       documentId
       title
       description
-      isTreanding
       content
-      cover {
-        url
-      }
+      views
       likes
+      banglaSlug
+      slug
+      isTreanding
       category {
         name
       }
-      news_status
+      createdAt
+      updatedAt
+      cover {
+        url
+      }
       comments {
-        content
-        createdAt
         author {
+          email
           name
         }
       }
@@ -70,6 +73,7 @@ export const GET_ARTICLES_BY_BANGLA_SLUG = gql`
       title
       description
       content
+      views
       cover {
         url
       }
