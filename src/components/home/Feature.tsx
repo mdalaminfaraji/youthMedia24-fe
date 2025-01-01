@@ -89,6 +89,7 @@ const Feature = () => {
         mt: { xs: 2, sm: 3 },
         py: { xs: 2, sm: 3 },
         // minHeight: { xs: '400px', sm: '500px', md:"auto" }
+        boxShadow: { xs: 'none', sm: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' },
       }}
     >
       <Grid
@@ -150,7 +151,7 @@ const Feature = () => {
               pt: 2,
               borderTop: '1px solid',
               borderColor: 'divider',
-              color: 'text.secondary',
+              // color: 'text.secondary',
               fontSize: { xs: '0.875rem', sm: '1rem' },
             }}
           >
