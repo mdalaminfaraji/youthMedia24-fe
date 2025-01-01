@@ -58,7 +58,7 @@ export default function NewsCard({ article }: NewsCardProps) {
         mx: 'auto',
         boxShadow: 'none',
         borderRadius: { xs: 1, sm: 2 },
-        backgroundColor: 'white',
+        // backgroundColor: 'white',
         transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
         '&:hover': {
           transform: 'translateY(-4px)',
@@ -67,7 +67,7 @@ export default function NewsCard({ article }: NewsCardProps) {
       }}
     >
       <Link
-        href={`/bangla/${article?.category?.name}/${article?.banglaSlug}?documentId=${article?.documentId}`}
+        href={`/bangla/${article?.category?.name}/${article?.documentId}`}
         passHref
         style={{
           textDecoration: 'none',
@@ -159,7 +159,7 @@ export default function NewsCard({ article }: NewsCardProps) {
             <Box sx={{ mt: 'auto' }}>
               <Typography
                 variant="body2"
-                color="text.secondary"
+                // color="text.secondary"
                 sx={{
                   fontSize: { xs: '0.75rem', sm: '0.875rem' },
                   display: 'flex',

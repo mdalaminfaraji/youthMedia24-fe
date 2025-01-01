@@ -120,7 +120,7 @@ const CurrentNews = () => {
               position: 'sticky',
               top: 20,
               p: { xs: 2, sm: 3 },
-              backgroundColor: 'grey.50',
+              // backgroundColor: 'grey.50',
               borderRadius: 2,
             }}
           >
@@ -160,7 +160,7 @@ const CurrentNews = () => {
                                 '& .MuiTypography-root': {
                                   fontSize: '1.2rem',
                                   fontWeight: 'medium',
-                                  color: 'text.primary',
+                                  // color: 'text.primary',
                                   transition: 'color 0.2s',
                                   '&:hover': {
                                     color: 'primary.main',
