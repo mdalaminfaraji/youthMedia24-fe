@@ -19,53 +19,107 @@ import ShareButton from '@/components/news/ShareButton'
 import { Metadata } from 'next'
 import { Container } from '@mui/material'
 import apolloClient from '@/lib/apolloClient'
-import { GET_SINGLE_ARTICLES } from '@/graphql/queries/articles'
+import {
+  GET_ARTICLES_WITH_SPECIFIC_CATEGORY,
+  GET_MOST_VIEWED_ARTICLES,
+  GET_SINGLE_ARTICLES,
+} from '@/graphql/queries/articles'
+import {
+  Cover,
+  NewsDetails,
+  SpecificArticleByCategory,
+} from '@/store/useArticleStore'
+import Link from 'next/link'
+import { formateDate } from '@/utils/urlHelper'
 
 interface NewsDetailsPageProps {
   params: {
     category: string
-    newsSlug: string
+    newsId: string
   }
   searchParams: { documentId?: string }
+}
+interface MostViewsArticles {
+  documentId: string
+  views: number
+  banglaSlug: string
+  title: string
+  category: {
+    name: string
+  }
+  cover: Cover[]
+}
+const RelatedNews = async (category: string) => {
+  const { data } = await apolloClient.query({
+    query: GET_ARTICLES_WITH_SPECIFIC_CATEGORY,
+    variables: {
+      locale: 'bn',
+      filters: {
+        category: {
+          name: {
+            containsi: category,
+          },
+        },
+      },
+    },
+  })
+  return data.articles
 }
 const newsDetailsData = async (documentId: string) => {
   const { data } = await apolloClient.query({
     query: GET_SINGLE_ARTICLES,
     variables: { documentId },
   })
-  return data
+  return data?.article
+}
+const MostViewsArticles = async () => {
+  const { data } = await apolloClient.query({
+    query: GET_MOST_VIEWED_ARTICLES,
+    variables: {
+      locale: 'bn',
+    },
+  })
+  return data.articles
 }
 export async function generateMetadata({
-  searchParams,
+  params,
 }: NewsDetailsPageProps): Promise<Metadata> {
-  const documentId = searchParams.documentId
+  const documentId = params.newsId
   const data: any = await newsDetailsData(documentId as string)
 
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
 
-  const fullUrl = `${baseUrl}/bangla/${data?.article?.category?.name}/${data?.article?.banglaSlug}`
+  const fullUrl = `${baseUrl}/bangla/${data?.category?.name}/${data?.banglaSlug}`
 
   return {
-    title: data?.article?.title,
-    description: data?.article?.description,
+    title: data?.title,
+    description: data?.description,
     openGraph: {
-      title: data?.article?.title,
-      description: data?.article?.description,
+      title: data?.title,
+      description: data?.description,
       url: fullUrl,
     },
   }
 }
 
-const NewsDetailsPage = async ({ searchParams }: NewsDetailsPageProps) => {
-  const newsData = await newsDetailsData(searchParams.documentId as string)
-  console.log('News Data:', newsData)
+const NewsDetailsPage = async ({ params }: NewsDetailsPageProps) => {
+  const { category, newsId } = params
+  const decodedCategory = decodeURIComponent(category)
+  const decodedNewsId = decodeURIComponent(newsId)
+  console.log(decodedNewsId)
+  const relatedNewsData: SpecificArticleByCategory[] = await RelatedNews(
+    decodedCategory
+  )
+  const newsData: NewsDetails = await newsDetailsData(decodedNewsId)
+
+  const mostViewsData: MostViewsArticles[] = await MostViewsArticles()
+
   const getNewsUrl = () => {
     if (typeof window !== 'undefined') {
       return `${window.location.origin}${window.location.pathname}`
     }
     return ''
   }
-
   const newsUrl = getNewsUrl()
 
   const shareButtons = [
@@ -83,14 +137,14 @@ const NewsDetailsPage = async ({ searchParams }: NewsDetailsPageProps) => {
       label: 'Share on Twitter',
       url: `https://twitter.com/intent/tweet?url=${encodeURIComponent(
         newsUrl
-      )}&text=${encodeURIComponent(newsData?.article?.title)}`,
+      )}&text=${encodeURIComponent(newsData?.title)}`,
     },
     {
       icon: <WhatsApp />,
       color: '#25D366',
       label: 'Share on WhatsApp',
       url: `https://wa.me/?text=${encodeURIComponent(
-        newsData?.article?.title
+        newsData?.title
       )}%20${encodeURIComponent(newsUrl)}`,
     },
     {
@@ -98,40 +152,8 @@ const NewsDetailsPage = async ({ searchParams }: NewsDetailsPageProps) => {
       color: '#EA4335',
       label: 'Share via Email',
       url: `mailto:?subject=${encodeURIComponent(
-        newsData?.article?.title
+        newsData?.title
       )}&body=${encodeURIComponent(newsUrl)}`,
-    },
-  ]
-
-  const relatedNews = [
-    'বিমানবন্দরে সামরিক প্রধানের ওপর আইসিসির প্রেফেরারি পরোয়ানা কি প্রভাব ফেলবে?',
-    'আমাকে রক্ষণশীল ইসলামি দেশের প্রধানমন্ত্রী হিসেবে বিবেচনা করুন: আব্দুল্লাহ',
-    'বিএনপির সেনাখাতের ওপর প্রেফেরারি পরোয়ানা বিষয়ক প্রেস বিজ্ঞপ্তি কি প্রভাব ফেলবে?',
-    'কিছু দেশ সেনা আদালতের ফায়দা তুলে প্রেফেরারি পরোয়ানা জারি করে না: এসা মনাই',
-    'নেতাজিহাদ কমিটির এক তাজা বিবৃতি প্রেফেরারি পরোয়ানা নিয়ে কি বলল?',
-  ]
-
-  const mostViewed = [
-    {
-      title: 'উইঘুরে আইনজীবী হত্যার করা হয়েছে?',
-      image: '/images/ict.jpg?height=60&width=60',
-    },
-    {
-      title: 'পোশাকশিল্পের পর বাংলাদেশের পরবর্তী ',
-      image: '/images/ict.jpg?height=60&width=60',
-    },
-    {
-      title:
-        'আত্মসমর্পণ করে জামিন পেলেন সামরিক সরবাহ হওয়া নির্বাহী ম্যাজিস্ট্রেট তাবাসসুম',
-      image: '/images/ict.jpg?height=60&width=60',
-    },
-    {
-      title: 'কুমিল্লা থেকে ঢেকার পথে এবার ফটিকছার শিকার হামলাত আন্তঃনগর পাড়ি',
-      image: '/images/ict.jpg?height=60&width=60',
-    },
-    {
-      title: 'বেনাপোলে স্বাভাবিক ভাবে-বাংলাদেশ বাণিজ্য ও যাতায়াত',
-      image: '/images/ict.jpg?height=60&width=60',
     },
   ]
 
@@ -182,37 +204,45 @@ const NewsDetailsPage = async ({ searchParams }: NewsDetailsPageProps) => {
               RELATED NEWS
             </Typography>
             <List sx={{ p: 0 }}>
-              {relatedNews.map((item, index) => (
-                <>
-                  <ListItem
+              {relatedNewsData.map((item, index) => {
+                if (item.documentId === newsData.documentId) {
+                  return null
+                }
+                return (
+                  <Link
                     key={index}
-                    disablePadding
-                    sx={{
-                      mb: 1.5,
-                      '&:last-child': { mb: 0 },
-                    }}
+                    href={`/bangla/${item?.category?.name}/${item.documentId}`}
+                    style={{ textDecoration: 'none', color: 'inherit' }}
                   >
-                    <ListItemText
-                      primary={item}
+                    <ListItem
+                      disablePadding
                       sx={{
-                        '& .MuiTypography-root': {
-                          fontSize: '0.9rem',
-                          fontWeight: 'medium',
-                          color: 'text.primary',
-                          transition: 'color 0.2s',
-                          '&:hover': {
-                            color: 'primary.main',
-                            cursor: 'pointer',
-                          },
-                        },
+                        mb: 1.5,
+                        '&:last-child': { mb: 0 },
                       }}
-                    />
-                  </ListItem>
-                  {index < mostViewed.length - 1 && (
-                    <Divider variant="fullWidth" component="li" />
-                  )}
-                </>
-              ))}
+                    >
+                      <ListItemText
+                        primary={item.title}
+                        sx={{
+                          '& .MuiTypography-root': {
+                            fontSize: '0.9rem',
+                            fontWeight: 'medium',
+                            color: 'text.primary',
+                            transition: 'color 0.2s',
+                            '&:hover': {
+                              color: 'primary.main',
+                              cursor: 'pointer',
+                            },
+                          },
+                        }}
+                      />
+                    </ListItem>
+                    {index < relatedNewsData.length - 1 && (
+                      <Divider variant="fullWidth" component="li" />
+                    )}
+                  </Link>
+                )
+              })}
             </List>
           </Paper>
         </Box>
@@ -250,9 +280,10 @@ const NewsDetailsPage = async ({ searchParams }: NewsDetailsPageProps) => {
                   width: '50px',
                   height: '10px',
                   pb: 1,
+                  mr: 1,
                 }}
-              ></Box>
-              Bangladesh
+              ></Box>{' '}
+              {newsData?.category?.name}
             </Typography>
             <Typography
               variant="h4"
@@ -264,7 +295,7 @@ const NewsDetailsPage = async ({ searchParams }: NewsDetailsPageProps) => {
                 lineHeight: 1.2,
               }}
             >
-              {newsData?.article?.title}
+              {newsData?.title}
             </Typography>
 
             <Box
@@ -276,10 +307,10 @@ const NewsDetailsPage = async ({ searchParams }: NewsDetailsPageProps) => {
               }}
             >
               <Typography variant="body2" color="text.secondary">
-                27 November, 2024, 10:35 pm
+                {formateDate(newsData?.createdAt)}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Last modified: 27 November, 2024, 11:15 pm
+                Last modified: {formateDate(newsData?.updatedAt)}
               </Typography>
             </Box>
 
@@ -295,7 +326,7 @@ const NewsDetailsPage = async ({ searchParams }: NewsDetailsPageProps) => {
                 <ShareButton key={index} button={button} />
               ))}
             </Box>
-            {newsData?.article?.cover[0].url && (
+            {newsData?.cover[0].url && (
               <Box
                 sx={{
                   position: 'relative',
@@ -307,7 +338,7 @@ const NewsDetailsPage = async ({ searchParams }: NewsDetailsPageProps) => {
                 }}
               >
                 <Image
-                  src={`${process.env.NEXT_PUBLIC_API_URL}${newsData?.article?.cover[0].url}`}
+                  src={`${process.env.NEXT_PUBLIC_API_URL}${newsData?.cover[0].url}`}
                   alt="News article main image"
                   fill
                   style={{ objectFit: 'cover' }}
@@ -316,11 +347,11 @@ const NewsDetailsPage = async ({ searchParams }: NewsDetailsPageProps) => {
               </Box>
             )}
 
-            {newsData?.article?.content && (
+            {newsData?.content && (
               <Box
                 sx={{ fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.8 }}
               >
-                <BlockRendererClient content={newsData?.article?.content} />
+                <BlockRendererClient content={newsData?.content} />
               </Box>
             )}
           </Paper>
@@ -357,57 +388,66 @@ const NewsDetailsPage = async ({ searchParams }: NewsDetailsPageProps) => {
               MOST VIEWED
             </Typography>
             <List sx={{ width: '100%', p: 0 }}>
-              {mostViewed.map((item, index) => (
-                <Box key={index}>
-                  <ListItem
-                    alignItems="flex-start"
-                    sx={{
-                      px: 0,
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s',
-                      '&:hover': {
-                        backgroundColor: 'action.hover',
-                      },
-                    }}
+              {mostViewsData.slice(0, 6).map((item, index) => {
+                if (item.documentId === newsData.documentId) {
+                  return null
+                }
+                return (
+                  <Link
+                    href={`/bangla/${item?.category?.name}/${item.documentId}`}
+                    key={index}
+                    style={{ textDecoration: 'none', color: 'inherit' }}
                   >
-                    <ListItemAvatar>
-                      <Avatar
-                        variant="square"
-                        sx={{
-                          width: 60,
-                          height: 60,
-                          mr: 2,
-                          borderRadius: 1,
-                        }}
-                      >
-                        <Image
-                          src={item.image}
-                          alt={item.title}
-                          fill
-                          style={{ objectFit: 'cover' }}
-                        />
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={item.title}
+                    <ListItem
+                      alignItems="flex-start"
                       sx={{
-                        '& .MuiTypography-root': {
-                          fontSize: '0.9rem',
-                          fontWeight: 'medium',
-                          lineHeight: 1.4,
-                          transition: 'color 0.2s',
-                          '&:hover': {
-                            color: 'primary.main',
-                          },
+                        px: 0,
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s',
+                        '&:hover': {
+                          backgroundColor: 'action.hover',
                         },
                       }}
-                    />
-                  </ListItem>
-                  {index < mostViewed.length - 1 && (
-                    <Divider variant="fullWidth" component="li" />
-                  )}
-                </Box>
-              ))}
+                    >
+                      <ListItemAvatar>
+                        <Avatar
+                          variant="square"
+                          sx={{
+                            width: 60,
+                            height: 60,
+                            mr: 2,
+                            borderRadius: 1,
+                          }}
+                        >
+                          <Image
+                            src={`${process.env.NEXT_PUBLIC_API_URL}${item.cover[0].url}`}
+                            alt={item.title}
+                            fill
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={item.title}
+                        sx={{
+                          '& .MuiTypography-root': {
+                            fontSize: '0.9rem',
+                            fontWeight: 'medium',
+                            lineHeight: 1.4,
+                            transition: 'color 0.2s',
+                            '&:hover': {
+                              color: 'primary.main',
+                            },
+                          },
+                        }}
+                      />
+                    </ListItem>
+                    {index < mostViewsData.length - 1 && (
+                      <Divider variant="fullWidth" component="li" />
+                    )}
+                  </Link>
+                )
+              })}
             </List>
           </Paper>
         </Box>

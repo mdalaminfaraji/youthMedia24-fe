@@ -142,7 +142,7 @@ const CurrentNews = () => {
                       article.banglaSlug &&
                       article?.isTreanding && (
                         <Link
-                          href={`/bangla/${article?.category?.name}/${article.banglaSlug}`}
+                          href={`/bangla/${article?.category?.name}/${article.documentId}`}
                           passHref
                           style={{ textDecoration: 'none', color: 'inherit' }}
                         >

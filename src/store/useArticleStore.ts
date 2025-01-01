@@ -4,6 +4,7 @@ import {
   GET_ALL_ARTICLES,
   GET_ARTICLES_BY_BANGLA_SLUG,
   GET_ARTICLES_WITH_SPECIFIC_CATEGORY,
+  GET_MOST_VIEWED_ARTICLES,
   GET_SINGLE_ARTICLES,
 } from '@/graphql/queries/articles'
 import apolloClient from '@/lib/apolloClient'
@@ -25,7 +26,7 @@ interface Article {
     name: string
   }
 }
-interface SpecificArticleByCategory {
+export interface SpecificArticleByCategory {
   documentId: string
   description: string
   banglaSlug: string
@@ -54,12 +55,25 @@ export interface NewsDetails {
     name: string
   }
   cover: Cover[]
+  createdAt: string
+  updatedAt: string
+}
+interface MostViewsArticles {
+  documentId: string
+  title: string
+  banglaSlug: string
+
+  views: number
+  category: {
+    name: string
+  }
 }
 interface ArticleStore {
   articles: Article[]
   specificCategoryArticles: SpecificArticleByCategory[]
   newsDetails: NewsDetails[]
   specificArticle: NewsDetails | null
+  mostViewsArticles: MostViewsArticles[]
   loading: boolean
   error: string | null
   locale: string
@@ -67,6 +81,7 @@ interface ArticleStore {
   fetchArticleByCategory: (category: string) => Promise<void>
   fetchNewsDetails: (slug: string) => Promise<void>
   fetchArticleByDocumentId: (documentId: string) => Promise<void>
+  fetchMostViewsArticles: () => Promise<void>
 }
 
 export const useArticleStore = create<ArticleStore>((set, get) => ({
@@ -76,7 +91,21 @@ export const useArticleStore = create<ArticleStore>((set, get) => ({
   loading: false,
   error: null,
   specificArticle: null,
+  mostViewsArticles: [],
   locale: 'bn',
+  fetchMostViewsArticles: async () => {
+    set({ loading: true, error: null })
+    try {
+      const { data } = await apolloClient.query({
+        query: GET_MOST_VIEWED_ARTICLES,
+        variables: { locale: get().locale },
+      })
+      const mostViewsData = data.articles
+      set({ mostViewsArticles: mostViewsData, loading: false })
+    } catch (error: any) {
+      set({ error: error.message, loading: false })
+    }
+  },
   fetchArticleByDocumentId: async (documentId: string) => {
     set({ loading: true, error: null })
 

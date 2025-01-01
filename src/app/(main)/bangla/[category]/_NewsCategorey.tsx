@@ -45,7 +45,7 @@ const NewsCard = ({
 
   return (
     <Link
-      href={`/bangla/${item?.category?.name}/${item?.banglaSlug}`}
+      href={`/bangla/${item?.category?.name}/${item?.documentId}`}
       passHref
       style={{
         textDecoration: 'none',
@@ -115,7 +115,7 @@ const NewsCard = ({
             }}
           >
             <Link
-              href={`/bangla/${item?.category?.name}/${item?.banglaSlug}`}
+              href={`/bangla/${item?.category?.name}/${item?.documentId}`}
               passHref
               style={{
                 textDecoration: 'none',

@@ -1,4 +1,7 @@
-// utils/urlHelpers.ts
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+dayjs.extend(utc)
+
 export const createReadableUrl = (text: string): string => {
   // Remove any special characters except Bengali unicode range and basic punctuation
   const cleanText = text.replace(/[^\u0980-\u09FF\w\s-]/g, '')
@@ -13,4 +16,8 @@ export const decodeReadableUrl = (url: string): string => {
 
   // Replace hyphens with spaces
   return decoded.replace(/-/g, ' ')
+}
+
+export const formateDate = (date: string): string => {
+  return dayjs(date.slice(0, -2)).utc().format('D, MMMM, YYYY, hh:mm a')
 }

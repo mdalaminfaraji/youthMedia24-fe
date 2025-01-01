@@ -91,3 +91,19 @@ export const GET_ARTICLES_BY_BANGLA_SLUG = gql`
     }
   }
 `
+export const GET_MOST_VIEWED_ARTICLES = gql`
+  query Articles($locale: I18NLocaleCode) {
+    articles(locale: $locale, sort: "views:desc") {
+      documentId
+      views
+      banglaSlug
+      cover {
+        url
+      }
+      title
+      category {
+        name
+      }
+    }
+  }
+`

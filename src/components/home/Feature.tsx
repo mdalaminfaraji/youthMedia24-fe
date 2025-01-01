@@ -122,7 +122,7 @@ const Feature = () => {
             }}
           >
             <Link
-              href={`/bangla/${article?.category?.name}/${article?.banglaSlug}`}
+              href={`/bangla/${article?.category?.name}/${article?.documentId}`}
               passHref
               style={{
                 textDecoration: 'none',
