@@ -1,14 +1,9 @@
 'use client'
-
-import Image from 'next/image'
 import {
-  AppBar,
   Box,
   Card,
   CardContent,
   CardMedia,
-  Container,
-  Toolbar,
   Typography,
   useTheme,
   useMediaQuery,
@@ -147,49 +142,61 @@ const NewsCard = ({
 }
 
 export default function NewsPage({ category }: { category: string }) {
-  const theme = useTheme()
   console.log(category)
   const specificCategoryArticles = useFetchArticlesByCategory(category)
   console.log(specificCategoryArticles)
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar
-        position="static"
-        elevation={0}
-        sx={{
-          backgroundColor: 'white',
-          borderBottom: 1,
-          borderColor: 'divider',
-        }}
-      >
-        <Toolbar>
-          <Image
-            src="/placeholder.svg?height=30&width=50"
-            alt="Bangladesh Flag"
-            width={50}
-            height={30}
-            priority
-          />
-          <Typography
-            variant="h6"
-            component="div"
+      <Box>
+        <Typography
+          variant="h6"
+          gutterBottom
+          sx={{
+            fontWeight: 'bold',
+            color: 'error.main',
+            display: 'inline-flex',
+            alignItems: 'center',
+            mt: 2,
+          }}
+        >
+          <Box
+            component="span"
             sx={{
-              ml: 2,
-              fontWeight: 700,
-              color: theme.palette.text.primary,
+              borderBottom: '5px solid',
+              borderColor: 'error.main',
+              width: '50px',
+              height: '10px',
+              pb: 1,
+              mr: 1,
             }}
-          >
-            বাংলাদেশ
-          </Typography>
-        </Toolbar>
-      </AppBar>
+          ></Box>{' '}
+          {category}
+        </Typography>
+        <Box
+          sx={{
+            width: '100%',
+            height: '4px',
+            backgroundColor: 'divider',
+            borderRadius: 15,
+            position: 'relative',
+          }}
+        >
+          <Box
+            sx={{
+              position: 'absolute',
+              width: '10%',
+              height: '4px',
+              backgroundColor: 'red',
+              borderRadius: 15,
+            }}
+          />
+        </Box>
+      </Box>
 
-      <Container
-        maxWidth="xl"
+      <Box
         sx={{
-          mt: { xs: 2, sm: 3, md: 4 },
-          px: { xs: 2, sm: 3, md: 4 },
+          my: { xs: 2, sm: 3, md: 4 },
         }}
       >
         <Box
@@ -241,7 +248,7 @@ export default function NewsPage({ category }: { category: string }) {
             <NewsCard key={index} item={item} />
           ))}
         </Box>
-      </Container>
+      </Box>
     </Box>
   )
 }
