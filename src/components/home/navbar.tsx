@@ -16,6 +16,7 @@ import { useCategoryStore } from '@/store/categoriesStore'
 import Image from 'next/image'
 import logo from '@/assests/youth24Logo.png'
 import Link from 'next/link'
+import LogoutButton from '../common/LogoutButton'
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout']
 
 function ResponsiveAppBar() {
@@ -182,6 +183,9 @@ function ResponsiveAppBar() {
                   </Typography>
                 </MenuItem>
               ))}
+              <MenuItem>
+                <LogoutButton />
+              </MenuItem>
             </Menu>
           </Box>
         </Toolbar>
