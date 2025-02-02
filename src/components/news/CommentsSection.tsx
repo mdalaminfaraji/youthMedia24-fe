@@ -1,5 +1,6 @@
 'use client'
 
+import { useAuth } from '@/providers/clientProvider/authProvider'
 import {
   Box,
   Typography,
@@ -30,6 +31,7 @@ interface CommentsSectionProps {
 }
 
 export default function CommentsSection({ articleId }: CommentsSectionProps) {
+  const { user } = useAuth()
   const [comment, setComment] = useState('')
   const [comments, setComments] = useState<Comment[]>([
     {
@@ -54,6 +56,7 @@ export default function CommentsSection({ articleId }: CommentsSectionProps) {
 
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('Submitting comment:', comment)
     if (comment.trim()) {
       const newComment: Comment = {
         id: comments.length + 1,
@@ -68,7 +71,7 @@ export default function CommentsSection({ articleId }: CommentsSectionProps) {
       setComment('')
     }
   }
-  console.log(articleId)
+  // console.log(user, 'articleId', articleId)
   return (
     <Box sx={{ mt: 6 }}>
       <Typography
@@ -130,45 +133,47 @@ export default function CommentsSection({ articleId }: CommentsSectionProps) {
         ))}
       </List>
       {/* Comment Form */}
-      <Paper
-        component="form"
-        onSubmit={handleCommentSubmit}
-        elevation={0}
-        sx={{
-          p: 2,
-          mb: 4,
-          backgroundColor: 'grey.50',
-          borderRadius: 2,
-        }}
-      >
-        <TextField
-          fullWidth
-          multiline
-          rows={2}
-          placeholder="Write your comment..."
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          sx={{ mb: 2 }}
-        />
-        <Box sx={{ position: 'relative' }}>
-          <Button
-            type="submit"
-            variant="contained"
-            size="small"
-            color="error"
-            sx={{
-              px: 4,
-              py: 1,
-              borderRadius: 2,
-              textTransform: 'none',
-              position: 'absolute',
-              right: 0,
-            }}
-          >
-            Post Comment
-          </Button>
-        </Box>
-      </Paper>
+      {user && (
+        <Paper
+          component="form"
+          onSubmit={handleCommentSubmit}
+          elevation={0}
+          sx={{
+            p: 2,
+            mb: 4,
+            backgroundColor: 'grey.50',
+            borderRadius: 2,
+          }}
+        >
+          <TextField
+            fullWidth
+            multiline
+            rows={2}
+            placeholder="Write your comment..."
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          <Box sx={{ position: 'relative' }}>
+            <Button
+              type="submit"
+              variant="contained"
+              size="small"
+              color="error"
+              sx={{
+                px: 4,
+                py: 1,
+                borderRadius: 2,
+                textTransform: 'none',
+                position: 'absolute',
+                right: 0,
+              }}
+            >
+              Post Comment
+            </Button>
+          </Box>
+        </Paper>
+      )}
     </Box>
   )
 }

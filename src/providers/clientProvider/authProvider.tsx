@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { auth } from '../../../firebase.config'
 import { onAuthStateChanged, User } from 'firebase/auth'
-import { getCookie, deleteCookie } from 'cookies-next'
+import { deleteCookie } from 'cookies-next'
 
 type AuthContextType = {
   user: User | null

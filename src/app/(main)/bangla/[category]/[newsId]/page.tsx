@@ -355,7 +355,7 @@ const NewsDetailsPage = async ({ params }: NewsDetailsPageProps) => {
               </Box>
             )}
           </Paper>
-          <CommentsSection />
+          <CommentsSection articleId={newsId} />
         </Box>
 
         {/* Right Column */}
