@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import { useState } from 'react'
 import {
@@ -23,26 +24,37 @@ import {
   Divider,
   Link,
 } from '@mui/material'
-const strapiLoginWithFirebase = async (idToken: string) => {
-  try {
-    const response = await fetch(
-      'http://localhost:1337/api/auth/firebase/callback',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ access_token: idToken }),
-      }
-    )
+import { authenticateWithStrapi } from '@/utils/strapi'
 
-    const data = await response.json()
-    if (!response.ok) throw new Error(data.error || 'Strapi login failed.')
-    console.log('Strapi Login Response:', data)
-    return data
-  } catch (error) {
-    console.error('Strapi Login Error:', error)
-    return null
-  }
-}
+// const loginStrapiUser = async (email: string, firebaseUID: string) => {
+//   try {
+//     const response = await fetch('http://localhost:1337/api/auth/local', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify({
+//         identifier: email,
+//         password: firebaseUID, // Using Firebase UID as password
+//       }),
+//     })
+
+//     const data = await response.json()
+//     if (response.ok) {
+//       return data
+//     }
+
+//     // If login fails, try to register the user
+//     return await createStrapiUser({
+//       email: email,
+//       uid: firebaseUID,
+//       username: email.split('@')[0],
+//     })
+//   } catch (error) {
+//     console.error('Strapi Login Error:', error)
+//     throw error
+//   }
+// }
 
 export default function SignupPage() {
   const router = useRouter()
@@ -69,27 +81,31 @@ export default function SignupPage() {
       const idToken = await user.getIdToken()
       if (!idToken) throw new Error('Failed to get ID token from Firebase.')
 
-      // Send Firebase token to Strapi
-      const strapiResponse = await strapiLoginWithFirebase(idToken)
+      // Authenticate with Strapi (this will create user if needed)
+      const strapiAuth = await authenticateWithStrapi({
+        email: user.email!,
+        uid: user.uid,
+        username: user.email!.split('@')[0],
+      })
 
-      if (!strapiResponse || !strapiResponse.jwt) {
-        throw new Error('Strapi authentication failed.')
-      }
-
-      // Set user cookie with Strapi JWT
+      // Set user cookie with both Firebase and Strapi data
       setCookie(
         'user',
         JSON.stringify({
           uid: user.uid,
           email: user.email,
-          jwt: strapiResponse.jwt, // Store Strapi JWT for authentication
+          jwt: strapiAuth.jwt,
+          strapiUserId: strapiAuth.user.id,
         }),
         {
           maxAge: 30 * 24 * 60 * 60, // 30 days
         }
       )
 
-      console.log('User registered and logged in:', strapiResponse)
+      console.log('User authenticated in both Firebase and Strapi:', {
+        firebase: user,
+        strapi: strapiAuth.user
+      })
       router.push('/') // Redirect to homepage
     } catch (error) {
       if (error instanceof Error) {
@@ -108,6 +124,13 @@ export default function SignupPage() {
       const result = await signInWithPopup(auth, provider)
       const user = result.user
 
+      // Authenticate with Strapi
+      const strapiAuth = await authenticateWithStrapi({
+        email: user.email!,
+        uid: user.uid,
+        username: user.displayName || user.email!.split('@')[0],
+      })
+
       setCookie(
         'user',
         JSON.stringify({
@@ -115,6 +138,8 @@ export default function SignupPage() {
           email: user.email,
           displayName: user.displayName,
           photoURL: user.photoURL,
+          jwt: strapiAuth.jwt,
+          strapiUserId: strapiAuth.user.id,
         }),
         {
           maxAge: 30 * 24 * 60 * 60, // 30 days

@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '../providers/clientProvider/authProvider'
 import ThemeProvider from '../providers/clientProvider/themeProvider'
+import ScrollToTopButton from '@/components/common/ScrollToTopButton'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,7 +21,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ThemeProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <ScrollToTopButton />
+            {children}
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

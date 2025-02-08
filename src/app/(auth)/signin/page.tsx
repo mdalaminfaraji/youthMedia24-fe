@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import { useState } from 'react'
 import {
@@ -13,6 +14,9 @@ import {
 } from 'firebase/auth'
 import { useRouter } from 'next/navigation'
 import { setCookie } from 'cookies-next'
+
+import { authenticateWithStrapi } from '@/utils/strapi'
+
 import {
   Box,
   TextField,
@@ -39,11 +43,20 @@ export default function SigninPage() {
       const result = await signInWithEmailAndPassword(auth, email, password)
       const user = result.user
 
+      // Authenticate with Strapi
+      const strapiAuth = await authenticateWithStrapi({
+        email: user.email!,
+        uid: user.uid,
+        username: user.email!.split('@')[0],
+      })
+
       setCookie(
         'user',
         JSON.stringify({
           uid: user.uid,
           email: user.email,
+          jwt: strapiAuth.jwt,
+          strapiUserId: strapiAuth.user.id,
         }),
         {
           maxAge: 30 * 24 * 60 * 60, // 30 days
@@ -68,6 +81,13 @@ export default function SigninPage() {
       const result = await signInWithPopup(auth, provider)
       const user = result.user
 
+      // Authenticate with Strapi
+      const strapiAuth = await authenticateWithStrapi({
+        email: user.email!,
+        uid: user.uid,
+        username: user.displayName || user.email!.split('@')[0],
+      })
+
       setCookie(
         'user',
         JSON.stringify({
@@ -75,6 +95,8 @@ export default function SigninPage() {
           email: user.email,
           displayName: user.displayName,
           photoURL: user.photoURL,
+          jwt: strapiAuth.jwt,
+          strapiUserId: strapiAuth.user.id,
         }),
         {
           maxAge: 30 * 24 * 60 * 60, // 30 days
