@@ -11,9 +11,9 @@ export const authenticateWithStrapi = async (userData: {
   try {
     // First check if user exists by email
     const checkResponse = await fetch(
-      `http://localhost:1337/api/users?filters[email][$eq]=${encodeURIComponent(
-        userData.email
-      )}`,
+      `${
+        process.env.NEXT_PUBLIC_API_URL
+      }/api/users?filters[email][$eq]=${encodeURIComponent(userData.email)}`,
       {
         method: 'GET',
         headers: {
@@ -68,7 +68,7 @@ export const authenticateWithStrapi = async (userData: {
 
     // Get the authenticated role id
     const roleResponse = await fetch(
-      'http://localhost:1337/api/users-permissions/roles'
+      `${process.env.NEXT_PUBLIC_API_URL}/api/users-permissions/roles`
     )
     const rolesData = await roleResponse.json()
     const authenticatedRole = rolesData.roles.find(
