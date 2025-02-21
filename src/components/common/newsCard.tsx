@@ -26,14 +26,11 @@ interface Article {
 interface NewsCardProps {
   article: Article
 }
-
+// ${process.env.NEXT_PUBLIC_API_URL}
 export default function NewsCard({ article }: NewsCardProps) {
   const [imageLoaded, setImageLoaded] = React.useState(false)
   const [imageError, setImageError] = React.useState(false)
-  const imageUrl =
-    article && article.cover
-      ? `${process.env.NEXT_PUBLIC_API_URL}${article.cover[0].url}`
-      : ''
+  const imageUrl = article && article.cover ? `${article.cover[0].url}` : ''
   const timeSinceCreated = article ? calculateTimeSince(article.createdAt) : ''
   console.log('Image URL:', imageUrl)
 

@@ -67,9 +67,10 @@ const NewsCard = ({
             animation="wave"
           />
         )}
+        {/* ${process.env.NEXT_PUBLIC_API_URL} */}
         <CardMedia
           component="img"
-          image={`${process.env.NEXT_PUBLIC_API_URL}${item?.cover[0]?.url}`}
+          image={`${item?.cover[0]?.url}`}
           alt={item?.title}
           onLoad={() => setImageLoaded(true)}
           sx={{

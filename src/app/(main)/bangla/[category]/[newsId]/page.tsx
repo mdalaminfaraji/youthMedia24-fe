@@ -84,7 +84,7 @@ const MostViewsArticles = async () => {
 export async function generateMetadata({
   params,
 }: NewsDetailsPageProps): Promise<Metadata> {
-  const documentId = params.newsId
+  const documentId = params?.newsId
   const data: any = await newsDetailsData(documentId as string)
 
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
@@ -337,8 +337,9 @@ const NewsDetailsPage = async ({ params }: NewsDetailsPageProps) => {
                   overflow: 'hidden',
                 }}
               >
+                {/* ${process.env.NEXT_PUBLIC_API_URL} */}
                 <Image
-                  src={`${process.env.NEXT_PUBLIC_API_URL}${newsData?.cover[0].url}`}
+                  src={`${newsData?.cover[0].url}`}
                   alt="News article main image"
                   fill
                   style={{ objectFit: 'cover' }}
@@ -419,8 +420,9 @@ const NewsDetailsPage = async ({ params }: NewsDetailsPageProps) => {
                             borderRadius: 1,
                           }}
                         >
+                          {/* ${process.env.NEXT_PUBLIC_API_URL} */}
                           <Image
-                            src={`${process.env.NEXT_PUBLIC_API_URL}${item.cover[0].url}`}
+                            src={`${item.cover[0].url}`}
                             alt={item.title}
                             fill
                             style={{ objectFit: 'cover' }}
