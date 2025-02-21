@@ -40,9 +40,10 @@ export const GET_SINGLE_ARTICLES = gql`
         url
       }
       comments {
-        author {
-          email
-          name
+        content
+        createdAt
+        user {
+          username
         }
       }
     }

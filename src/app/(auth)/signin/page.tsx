@@ -49,14 +49,14 @@ export default function SigninPage() {
         uid: user.uid,
         username: user.email!.split('@')[0],
       })
-
+      console.log(strapiAuth)
       setCookie(
         'user',
         JSON.stringify({
           uid: user.uid,
           email: user.email,
           jwt: strapiAuth.jwt,
-          strapiUserId: strapiAuth.user.id,
+          strapiUserId: strapiAuth.user.documentId,
         }),
         {
           maxAge: 30 * 24 * 60 * 60, // 30 days
@@ -96,7 +96,7 @@ export default function SigninPage() {
           displayName: user.displayName,
           photoURL: user.photoURL,
           jwt: strapiAuth.jwt,
-          strapiUserId: strapiAuth.user.id,
+          strapiUserId: strapiAuth.user.documentId,
         }),
         {
           maxAge: 30 * 24 * 60 * 60, // 30 days

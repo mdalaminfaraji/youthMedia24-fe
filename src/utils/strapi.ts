@@ -56,6 +56,7 @@ export const authenticateWithStrapi = async (userData: {
 
       // const loginData = await loginResponse.json()
       if (data) {
+        console.log(data)
         return data?.login
       }
       throw new Error(data.error?.message || 'Login failed')

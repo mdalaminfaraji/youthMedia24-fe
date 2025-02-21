@@ -89,13 +89,14 @@ export default function SignupPage() {
       })
 
       // Set user cookie with both Firebase and Strapi data
+      console.log(strapiAuth)
       setCookie(
         'user',
         JSON.stringify({
           uid: user.uid,
           email: user.email,
           jwt: strapiAuth.jwt,
-          strapiUserId: strapiAuth.user.id,
+          strapiUserId: strapiAuth.user?.documentId,
         }),
         {
           maxAge: 30 * 24 * 60 * 60, // 30 days
@@ -104,7 +105,7 @@ export default function SignupPage() {
 
       console.log('User authenticated in both Firebase and Strapi:', {
         firebase: user,
-        strapi: strapiAuth.user
+        strapi: strapiAuth.user,
       })
       router.push('/') // Redirect to homepage
     } catch (error) {
@@ -139,7 +140,7 @@ export default function SignupPage() {
           displayName: user.displayName,
           photoURL: user.photoURL,
           jwt: strapiAuth.jwt,
-          strapiUserId: strapiAuth.user.id,
+          strapiUserId: strapiAuth.user?.documentId,
         }),
         {
           maxAge: 30 * 24 * 60 * 60, // 30 days
