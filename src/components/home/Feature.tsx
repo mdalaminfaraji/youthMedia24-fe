@@ -34,9 +34,8 @@ const Feature = () => {
   }, [fetchArticles])
 
   const article = articles[0]
-  console.log(article)
-  const coverUrl =
-    article && article.cover ? `${API_URL}${article.cover[0].url}` : null
+  console.log(API_URL)
+  const coverUrl = article && article.cover ? `${article.cover[0].url}` : null
   const timeSinceCreated = article ? calculateTimeSince(article.createdAt) : ''
 
   if (loading) {

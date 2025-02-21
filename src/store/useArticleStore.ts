@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { CREATE_COMMENT_MUTATION } from '@/graphql/mutation/comment'
 import {
   GET_ALL_ARTICLES,
   GET_ARTICLES_BY_BANGLA_SLUG,
@@ -12,6 +13,12 @@ import { create } from 'zustand'
 
 export interface Cover {
   url: string
+}
+
+interface CreateCommentInput {
+  article: string
+  content: string
+  user: string
 }
 
 interface Article {
@@ -37,6 +44,14 @@ export interface SpecificArticleByCategory {
   cover: Cover[]
 }
 
+export interface Comment {
+  documentId: string
+  content: string
+  createdAt: string
+  user: {
+    username: string
+  }
+}
 export interface NewsDetails {
   documentId: string
   description: string
@@ -44,16 +59,10 @@ export interface NewsDetails {
   title: string
   likes: number
   content: any
-  comments: {
-    content: string
-    createdAt: string
-    author: {
-      name: string
-    }
-  }
   category: {
     name: string
   }
+  comments: Comment[]
   cover: Cover[]
   createdAt: string
   updatedAt: string
@@ -74,6 +83,7 @@ interface ArticleStore {
   newsDetails: NewsDetails[]
   specificArticle: NewsDetails | null
   mostViewsArticles: MostViewsArticles[]
+  comments: Comment[]
   loading: boolean
   error: string | null
   locale: string
@@ -82,6 +92,7 @@ interface ArticleStore {
   fetchNewsDetails: (slug: string) => Promise<void>
   fetchArticleByDocumentId: (documentId: string) => Promise<void>
   fetchMostViewsArticles: () => Promise<void>
+  createComment: (data: CreateCommentInput, locale: string) => Promise<void>
 }
 
 export const useArticleStore = create<ArticleStore>((set, get) => ({
@@ -92,6 +103,7 @@ export const useArticleStore = create<ArticleStore>((set, get) => ({
   error: null,
   specificArticle: null,
   mostViewsArticles: [],
+  comments: [],
   locale: 'bn',
   fetchMostViewsArticles: async () => {
     set({ loading: true, error: null })
@@ -115,7 +127,11 @@ export const useArticleStore = create<ArticleStore>((set, get) => ({
         variables: { documentId },
       })
       const article = data.article
-      set({ specificArticle: article, loading: false })
+      set({
+        specificArticle: article,
+        comments: article?.comments,
+        loading: false,
+      })
     } catch (err: any) {
       set({ error: err.message, loading: false })
     }
@@ -178,6 +194,22 @@ export const useArticleStore = create<ArticleStore>((set, get) => ({
       })
       const articles = data.articles
       set({ specificCategoryArticles: articles, loading: false })
+    } catch (err: any) {
+      set({ error: err.message, loading: false })
+    }
+  },
+  createComment: async (data: CreateCommentInput, locale: string) => {
+    set({ loading: true, error: null })
+
+    try {
+      const response = await apolloClient.mutate({
+        mutation: CREATE_COMMENT_MUTATION,
+        variables: { data, locale },
+      })
+      console.log(response)
+      const commentData = response.data.createComment
+
+      set({ comments: [...get().comments, commentData], loading: false })
     } catch (err: any) {
       set({ error: err.message, loading: false })
     }
