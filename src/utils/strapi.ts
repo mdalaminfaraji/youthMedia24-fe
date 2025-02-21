@@ -1,3 +1,4 @@
+'use client'
 import { LOGIN_MUTATION, REGISTER_MUTATION } from '@/graphql/mutation/auth'
 import apolloClient from '@/lib/apolloClient'
 

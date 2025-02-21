@@ -16,7 +16,6 @@ import CommentsSection from '@/components/news/CommentsSection'
 
 import BlockRendererClient from '@/components/BlockRenderer'
 import ShareButton from '@/components/news/ShareButton'
-import { Metadata } from 'next'
 import { Container } from '@mui/material'
 import apolloClient from '@/lib/apolloClient'
 import {
@@ -31,14 +30,21 @@ import {
 } from '@/store/useArticleStore'
 import Link from 'next/link'
 import { formateDate } from '@/utils/urlHelper'
+import { Metadata } from 'next'
 
-interface NewsDetailsPageProps {
-  params: {
-    category: string
-    newsId: string
-  }
-  searchParams: { documentId?: string }
+type PageParams = {
+  category: string
+  newsId: string
 }
+
+type SearchParams = { [key: string]: string | string[] | undefined }
+
+type Props = {
+  params: Promise<PageParams>
+  searchParams?: Promise<SearchParams>
+}
+
+type PageProps = Props
 interface MostViewsArticles {
   documentId: string
   views: number
@@ -83,8 +89,9 @@ const MostViewsArticles = async () => {
 }
 export async function generateMetadata({
   params,
-}: NewsDetailsPageProps): Promise<Metadata> {
-  const documentId = params?.newsId
+}: PageProps): Promise<Metadata> {
+  const resolvedParams = await params
+  const documentId = resolvedParams.newsId
   const data: any = await newsDetailsData(documentId as string)
 
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
@@ -102,8 +109,9 @@ export async function generateMetadata({
   }
 }
 
-const NewsDetailsPage = async ({ params }: NewsDetailsPageProps) => {
-  const { category, newsId } = params
+const NewsDetailsPage = async ({ params }: PageProps) => {
+  const resolvedParams = await params
+  const { category, newsId } = resolvedParams
   const decodedCategory = decodeURIComponent(category)
   const decodedNewsId = decodeURIComponent(newsId)
   console.log(decodedNewsId)
