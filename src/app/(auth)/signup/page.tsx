@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import { useState } from 'react'
 import {
@@ -22,47 +21,34 @@ import {
   CircularProgress,
   Alert,
   Divider,
-  Link,
+  Paper,
+  Container,
+  Link as MuiLink,
+  InputAdornment,
+  IconButton,
 } from '@mui/material'
 import { authenticateWithStrapi } from '@/utils/strapi'
-
-// const loginStrapiUser = async (email: string, firebaseUID: string) => {
-//   try {
-//     const response = await fetch('http://localhost:1337/api/auth/local', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify({
-//         identifier: email,
-//         password: firebaseUID, // Using Firebase UID as password
-//       }),
-//     })
-
-//     const data = await response.json()
-//     if (response.ok) {
-//       return data
-//     }
-
-//     // If login fails, try to register the user
-//     return await createStrapiUser({
-//       email: email,
-//       uid: firebaseUID,
-//       username: email.split('@')[0],
-//     })
-//   } catch (error) {
-//     console.error('Strapi Login Error:', error)
-//     throw error
-//   }
-// }
+import GoogleIcon from '@mui/icons-material/Google'
+import FacebookIcon from '@mui/icons-material/Facebook'
+import VisibilityIcon from '@mui/icons-material/Visibility'
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
+import EmailIcon from '@mui/icons-material/Email'
+import LockIcon from '@mui/icons-material/Lock'
+import PersonIcon from '@mui/icons-material/Person'
+import Link from 'next/link'
+import Image from 'next/image'
+import logo from '@/assests/youth24Logo.png'
 
 export default function SignupPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -85,28 +71,24 @@ export default function SignupPage() {
       const strapiAuth = await authenticateWithStrapi({
         email: user.email!,
         uid: user.uid,
-        username: user.email!.split('@')[0],
+        username: username || user.email!.split('@')[0],
       })
 
       // Set user cookie with both Firebase and Strapi data
-      console.log(strapiAuth)
       setCookie(
         'user',
         JSON.stringify({
           uid: user.uid,
           email: user.email,
+          username: username || user.email!.split('@')[0],
           jwt: strapiAuth.jwt,
-          strapiUserId: strapiAuth.user?.documentId,
+          documentId: strapiAuth.user?.documentId,
         }),
         {
           maxAge: 30 * 24 * 60 * 60, // 30 days
         }
       )
 
-      console.log('User authenticated in both Firebase and Strapi:', {
-        firebase: user,
-        strapi: strapiAuth.user,
-      })
       router.push('/') // Redirect to homepage
     } catch (error) {
       if (error instanceof Error) {
@@ -119,9 +101,12 @@ export default function SignupPage() {
   }
 
   const handleSocialSignup = async (
-    provider: GoogleAuthProvider | FacebookAuthProvider
+    provider: GoogleAuthProvider | FacebookAuthProvider,
+    providerName: string
   ) => {
     try {
+      setLoading(true)
+      setError('')
       const result = await signInWithPopup(auth, provider)
       const user = result.user
 
@@ -140,7 +125,8 @@ export default function SignupPage() {
           displayName: user.displayName,
           photoURL: user.photoURL,
           jwt: strapiAuth.jwt,
-          strapiUserId: strapiAuth.user?.documentId,
+          documentId: strapiAuth.user?.documentId,
+          username: user.displayName || user.email!.split('@')[0],
         }),
         {
           maxAge: 30 * 24 * 60 * 60, // 30 days
@@ -152,109 +138,296 @@ export default function SignupPage() {
       if (error instanceof Error) {
         setError(error.message)
       } else {
-        setError('Social sign up failed. Please try again.')
+        setError(`${providerName} sign up failed. Please try again.`)
       }
+      setLoading(false)
     }
   }
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword)
+  }
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword)
+  }
+
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        bgcolor: 'background.default',
-        p: 2,
-      }}
-    >
-      <Box
+    <Container maxWidth="sm" sx={{ py: 8 }}>
+      <Paper
+        elevation={3}
         sx={{
-          bgcolor: 'background.paper',
-          p: 4,
           borderRadius: 2,
-          boxShadow: 1,
-          width: '100%',
-          maxWidth: 400,
+          overflow: 'hidden',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.12)',
         }}
       >
-        <Typography variant="h4" component="h1" align="center" gutterBottom>
-          Sign Up
-        </Typography>
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-
-        <Box component="form" onSubmit={handleEmailSignup}>
-          <TextField
-            fullWidth
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            margin="normal"
-            required
-          />
-          <TextField
-            fullWidth
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            margin="normal"
-            required
-          />
-          <TextField
-            fullWidth
-            label="Confirm Password"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            margin="normal"
-            required
-          />
-          <Button
-            fullWidth
-            type="submit"
-            variant="contained"
-            disabled={loading}
-            sx={{ mt: 2 }}
+        {/* Header with logo */}
+        <Box
+          sx={{
+            bgcolor: '#00141A',
+            color: 'white',
+            p: 3,
+            textAlign: 'center',
+            borderBottom: '4px solid #ff4d4d',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mb: 2,
+            }}
           >
-            {loading ? <CircularProgress size={24} /> : 'Sign Up'}
-          </Button>
+            <Image
+              src={logo}
+              alt="YouthMedia24 Logo"
+              width={50}
+              height={50}
+              style={{ borderRadius: '8px' }}
+            />
+            <Typography
+              variant="h5"
+              sx={{
+                ml: 2,
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 700,
+                background: 'linear-gradient(45deg, #FFF 30%, #E3F2FD 90%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              YOUTHMEDIA24
+            </Typography>
+          </Box>
+          <Typography variant="h5" fontWeight="bold">
+            Create Account
+          </Typography>
+          <Typography variant="body2" sx={{ mt: 1, opacity: 0.8 }}>
+            Join our community for the latest news and updates
+          </Typography>
         </Box>
 
-        <Divider sx={{ my: 3 }}>OR</Divider>
+        {/* Form content */}
+        <Box sx={{ p: 4 }}>
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
 
-        <Button
-          fullWidth
-          variant="contained"
-          color="error"
-          onClick={() => handleSocialSignup(googleProvider)}
-          sx={{ mb: 2 }}
-        >
-          Sign up with Google
-        </Button>
-        <Button
-          fullWidth
-          variant="contained"
-          color="primary"
-          onClick={() => handleSocialSignup(facebookProvider)}
-          sx={{ mb: 2 }}
-        >
-          Sign up with Facebook
-        </Button>
+          <Box component="form" onSubmit={handleEmailSignup}>
+            <TextField
+              fullWidth
+              label="Email Address"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              margin="normal"
+              required
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <EmailIcon color="action" />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                },
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Username (optional)"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              margin="normal"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonIcon color="action" />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                },
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              margin="normal"
+              required
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon color="action" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={togglePasswordVisibility}
+                      edge="end"
+                    >
+                      {showPassword ? (
+                        <VisibilityOffIcon />
+                      ) : (
+                        <VisibilityIcon />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                },
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Confirm Password"
+              type={showConfirmPassword ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              margin="normal"
+              required
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon color="action" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle confirm password visibility"
+                      onClick={toggleConfirmPasswordVisibility}
+                      edge="end"
+                    >
+                      {showConfirmPassword ? (
+                        <VisibilityOffIcon />
+                      ) : (
+                        <VisibilityIcon />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                },
+              }}
+            />
 
-        <Typography variant="body2" align="center">
-          Already have an account?{' '}
-          <Link href="/signin" color="primary">
-            Sign in
-          </Link>
-        </Typography>
-      </Box>
-    </Box>
+            <Button
+              fullWidth
+              type="submit"
+              variant="contained"
+              disabled={loading}
+              sx={{
+                mt: 3,
+                mb: 2,
+                py: 1.5,
+                borderRadius: 2,
+                backgroundColor: '#ff4d4d',
+                '&:hover': {
+                  backgroundColor: '#e60000',
+                },
+                textTransform: 'none',
+                fontWeight: 'bold',
+              }}
+            >
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                'Create Account'
+              )}
+            </Button>
+          </Box>
+
+          <Divider sx={{ my: 3 }}>
+            <Typography variant="body2" color="text.secondary">
+              OR
+            </Typography>
+          </Divider>
+
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: 2,
+            }}
+          >
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={() => handleSocialSignup(googleProvider, 'Google')}
+              disabled={loading}
+              startIcon={<GoogleIcon />}
+              sx={{
+                py: 1.5,
+                borderRadius: 2,
+                borderColor: '#4285F4',
+                color: '#4285F4',
+                '&:hover': {
+                  borderColor: '#4285F4',
+                  backgroundColor: 'rgba(66, 133, 244, 0.04)',
+                },
+                textTransform: 'none',
+              }}
+            >
+              Sign up with Google
+            </Button>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={() => handleSocialSignup(facebookProvider, 'Facebook')}
+              disabled={loading}
+              startIcon={<FacebookIcon />}
+              sx={{
+                py: 1.5,
+                borderRadius: 2,
+                borderColor: '#3b5998',
+                color: '#3b5998',
+                '&:hover': {
+                  borderColor: '#3b5998',
+                  backgroundColor: 'rgba(59, 89, 152, 0.04)',
+                },
+                textTransform: 'none',
+              }}
+            >
+              Sign up with Facebook
+            </Button>
+          </Box>
+
+          <Box sx={{ mt: 4, textAlign: 'center' }}>
+            <Typography variant="body2" color="text.secondary">
+              Already have an account?{' '}
+              <MuiLink
+                component={Link}
+                href="/signin"
+                underline="hover"
+                sx={{ fontWeight: 'bold', color: '#ff4d4d' }}
+              >
+                Sign in
+              </MuiLink>
+            </Typography>
+          </Box>
+        </Box>
+      </Paper>
+    </Container>
   )
 }
