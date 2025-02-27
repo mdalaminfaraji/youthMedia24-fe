@@ -119,6 +119,7 @@ const NewsDetailsPage = async ({ params }: PageProps) => {
     decodedCategory
   )
   const newsData: NewsDetails = await newsDetailsData(decodedNewsId)
+  console.log(newsData)
 
   const mostViewsData: MostViewsArticles[] = await MostViewsArticles()
 
@@ -364,7 +365,7 @@ const NewsDetailsPage = async ({ params }: PageProps) => {
               </Box>
             )}
           </Paper>
-          <CommentsSection articleId={newsId} />
+          <CommentsSection newsData={newsData} />
         </Box>
 
         {/* Right Column */}

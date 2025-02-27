@@ -140,12 +140,18 @@ const ResponsiveAppBar = () => {
 
           {/* Logo Section - Responsive */}
           <Box
+            component={Link}
+            href="/"
             sx={{
               display: 'flex',
               alignItems: 'center',
               flexGrow: { xs: 1, md: 0 },
               justifyContent: { xs: 'center', md: 'flex-start' },
               ml: { xs: -4, md: 0 },
+              textDecoration: 'none',
+              '&:hover': {
+                opacity: 0.9,
+              },
             }}
           >
             <Image
@@ -266,7 +272,6 @@ const ResponsiveAppBar = () => {
                     color: 'white',
                     display: 'block',
                     textTransform: 'capitalize',
-                    px: 2,
                     py: 1,
                     borderRadius: '8px',
                     transition: 'all 0.3s ease',
