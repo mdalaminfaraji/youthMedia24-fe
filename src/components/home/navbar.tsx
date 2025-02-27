@@ -145,12 +145,15 @@ const ResponsiveAppBar = () => {
 
           {/* Logo Section - Responsive */}
           <Box
+            component={Link}
+            href="/"
             sx={{
               display: 'flex',
               alignItems: 'center',
               flexGrow: { xs: 1, md: 0 },
               justifyContent: { xs: 'center', md: 'flex-start' },
               ml: { xs: -4, md: 0 },
+              textDecoration: 'none',
             }}
           >
             <Image
@@ -331,7 +334,9 @@ const ResponsiveAppBar = () => {
                     <MenuItem
                       key={setting}
                       onClick={
-                        setting === 'Logout' ? handleLogout : handleCloseUserMenu
+                        setting === 'Logout'
+                          ? handleLogout
+                          : handleCloseUserMenu
                       }
                       sx={{
                         color: '#fff',
