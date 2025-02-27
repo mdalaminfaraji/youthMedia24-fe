@@ -1,4 +1,5 @@
 'use client'
+import { Button } from '@mui/material'
 import { useAuth } from '../../providers/clientProvider/authProvider'
 import { useRouter } from 'next/navigation'
 
@@ -12,11 +13,16 @@ export default function LogoutButton() {
   }
 
   return (
-    <button
+    <Button
       onClick={handleLogout}
-      className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+      sx={{
+        color: '#fff',
+        '&:hover': {
+          backgroundColor: 'rgba(255, 0, 0, 0.1)',
+        },
+      }}
     >
       Logout
-    </button>
+    </Button>
   )
 }
