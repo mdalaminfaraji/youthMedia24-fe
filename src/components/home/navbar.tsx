@@ -31,8 +31,10 @@ const ResponsiveAppBar = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null)
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
-  const { categories, fetchCategories, loading, error } = useCategoryStore()
+  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
+    null
+  )
+  const { categories, fetchCategories, loading } = useCategoryStore()
   const { logout } = useAuth()
   const router = useRouter()
 
@@ -102,8 +104,6 @@ const ResponsiveAppBar = () => {
       </AppBar>
     )
   }
-
-  if (error) return <div>Error: {error}</div>
 
   return (
     <AppBar
@@ -334,16 +334,15 @@ const ResponsiveAppBar = () => {
                 <MenuItem
                   key={setting}
                   onClick={
-                    setting === 'Logout'
-                      ? handleLogout
-                      : handleCloseUserMenu
+                    setting === 'Logout' ? handleLogout : handleCloseUserMenu
                   }
                   sx={{
                     color: '#fff',
                     '&:hover': {
-                      backgroundColor: setting === 'Logout'
-                        ? 'rgba(255, 0, 0, 0.1)'
-                        : 'rgba(255, 255, 255, 0.1)',
+                      backgroundColor:
+                        setting === 'Logout'
+                          ? 'rgba(255, 0, 0, 0.1)'
+                          : 'rgba(255, 255, 255, 0.1)',
                     },
                   }}
                 >
