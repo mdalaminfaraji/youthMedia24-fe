@@ -24,6 +24,7 @@ import logo from '@/assests/youth24Logo.png'
 import Link from 'next/link'
 import { useAuth } from '@/providers/clientProvider/authProvider'
 import { useRouter } from 'next/navigation'
+import LoginIcon from '@mui/icons-material/Login'
 
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout']
 
@@ -35,7 +36,7 @@ const ResponsiveAppBar = () => {
     null
   )
   const { categories, fetchCategories, loading } = useCategoryStore()
-  const { logout } = useAuth()
+  const { user, logout } = useAuth()
   const router = useRouter()
 
   React.useEffect(() => {
@@ -52,6 +53,10 @@ const ResponsiveAppBar = () => {
   const handleLogout = async () => {
     handleCloseUserMenu()
     await logout()
+    router.push('/signin')
+  }
+
+  const handleSignIn = () => {
     router.push('/signin')
   }
 
@@ -140,18 +145,12 @@ const ResponsiveAppBar = () => {
 
           {/* Logo Section - Responsive */}
           <Box
-            component={Link}
-            href="/"
             sx={{
               display: 'flex',
               alignItems: 'center',
               flexGrow: { xs: 1, md: 0 },
               justifyContent: { xs: 'center', md: 'flex-start' },
               ml: { xs: -4, md: 0 },
-              textDecoration: 'none',
-              '&:hover': {
-                opacity: 0.9,
-              },
             }}
           >
             <Image
@@ -288,80 +287,94 @@ const ResponsiveAppBar = () => {
           </Box>
 
           {/* User Menu */}
-          <Box sx={{ ml: { xs: 1, md: 2 } }}>
-            <Tooltip title="Open settings" arrow>
-              <IconButton
-                onClick={handleOpenUserMenu}
-                sx={{
-                  p: 0,
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'scale(1.1)',
-                  },
-                }}
-              >
-                <Avatar
-                  alt="User Avatar"
-                  src="/static/images/avatar/2.jpg"
+          <Box sx={{ flexGrow: 0 }}>
+            {user ? (
+              <>
+                <Tooltip title="Open settings">
+                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                    <Avatar
+                      alt={user.displayName || 'User'}
+                      src={user.photoURL || ''}
+                      sx={{
+                        width: { xs: 35, md: 40 },
+                        height: { xs: 35, md: 40 },
+                        border: '2px solid rgba(255, 255, 255, 0.2)',
+                      }}
+                    />
+                  </IconButton>
+                </Tooltip>
+                <Menu
                   sx={{
-                    width: { xs: 35, md: 40 },
-                    height: { xs: 35, md: 40 },
-                    border: '2px solid rgba(255, 255, 255, 0.2)',
-                  }}
-                />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{
-                mt: '45px',
-                '& .MuiPaper-root': {
-                  backgroundColor: '#001f2b',
-                  borderRadius: '8px',
-                  minWidth: '200px',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                },
-              }}
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-              TransitionComponent={Fade}
-            >
-              {settings.map((setting) => (
-                <MenuItem
-                  key={setting}
-                  onClick={
-                    setting === 'Logout' ? handleLogout : handleCloseUserMenu
-                  }
-                  sx={{
-                    color: '#fff',
-                    '&:hover': {
-                      backgroundColor:
-                        setting === 'Logout'
-                          ? 'rgba(255, 0, 0, 0.1)'
-                          : 'rgba(255, 255, 255, 0.1)',
+                    mt: '45px',
+                    '& .MuiPaper-root': {
+                      backgroundColor: '#001f2b',
+                      borderRadius: '8px',
+                      minWidth: '200px',
+                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
                     },
                   }}
+                  anchorEl={anchorElUser}
+                  anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  open={Boolean(anchorElUser)}
+                  onClose={handleCloseUserMenu}
+                  TransitionComponent={Fade}
                 >
-                  <Typography
-                    sx={{
-                      textAlign: 'center',
-                      color: setting === 'Logout' ? '#ff4d4d' : '#fff',
-                    }}
-                  >
-                    {setting}
-                  </Typography>
-                </MenuItem>
-              ))}
-            </Menu>
+                  {settings.map((setting) => (
+                    <MenuItem
+                      key={setting}
+                      onClick={
+                        setting === 'Logout' ? handleLogout : handleCloseUserMenu
+                      }
+                      sx={{
+                        color: '#fff',
+                        '&:hover': {
+                          backgroundColor:
+                            setting === 'Logout'
+                              ? 'rgba(255, 0, 0, 0.1)'
+                              : 'rgba(255, 255, 255, 0.1)',
+                        },
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          textAlign: 'center',
+                          color: setting === 'Logout' ? '#ff4d4d' : '#fff',
+                        }}
+                      >
+                        {setting}
+                      </Typography>
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </>
+            ) : (
+              <Button
+                variant="contained"
+                startIcon={<LoginIcon />}
+                onClick={handleSignIn}
+                sx={{
+                  backgroundColor: '#ff4d4d',
+                  '&:hover': {
+                    backgroundColor: '#e60000',
+                  },
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                  fontWeight: 'bold',
+                  px: 2,
+                  py: 1,
+                }}
+              >
+                Sign In
+              </Button>
+            )}
           </Box>
         </Toolbar>
       </Container>
