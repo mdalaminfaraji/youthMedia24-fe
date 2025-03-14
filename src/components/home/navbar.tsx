@@ -6,15 +6,10 @@ import {
   Toolbar,
   IconButton,
   Typography,
-  Menu,
   Container,
-  Avatar,
   Button,
-  Tooltip,
-  MenuItem,
   useTheme,
   useMediaQuery,
-  Fade,
   Skeleton,
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
@@ -25,6 +20,9 @@ import Link from 'next/link'
 import { useAuth } from '@/providers/clientProvider/authProvider'
 import { useRouter } from 'next/navigation'
 import LoginIcon from '@mui/icons-material/Login'
+import CustomDropdown from '@/components/common/CustomDropdown'
+import CustomAvatar from '@/components/common/CustomAvatar'
+import CustomMobileMenu from '@/components/common/CustomMobileMenu'
 
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout']
 
@@ -32,9 +30,6 @@ const ResponsiveAppBar = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null)
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
-    null
-  )
   const { categories, fetchCategories, loading } = useCategoryStore()
   const { user, logout } = useAuth()
   const router = useRouter()
@@ -45,13 +40,10 @@ const ResponsiveAppBar = () => {
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) =>
     setAnchorElNav(event.currentTarget)
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) =>
-    setAnchorElUser(event.currentTarget)
   const handleCloseNavMenu = () => setAnchorElNav(null)
-  const handleCloseUserMenu = () => setAnchorElUser(null)
+  const handleCloseUserMenu = () => {}
 
   const handleLogout = async () => {
-    handleCloseUserMenu()
     await logout()
     router.push('/signin')
   }
@@ -59,6 +51,13 @@ const ResponsiveAppBar = () => {
   const handleSignIn = () => {
     router.push('/signin')
   }
+
+  // Create dropdown menu items
+  const dropdownItems = settings.map((setting) => ({
+    label: setting,
+    onClick: setting === 'Logout' ? handleLogout : handleCloseUserMenu,
+    isLogout: setting === 'Logout',
+  }))
 
   if (loading) {
     return (
@@ -183,75 +182,12 @@ const ResponsiveAppBar = () => {
           </Box>
 
           {/* Mobile Menu */}
-          <Menu
-            anchorEl={anchorElNav}
-            open={Boolean(anchorElNav)}
+          <CustomMobileMenu
+            isOpen={Boolean(anchorElNav)}
             onClose={handleCloseNavMenu}
-            TransitionComponent={Fade}
-            sx={{
-              display: { xs: 'block', md: 'none' },
-              '& .MuiPaper-root': {
-                backgroundColor: '#001f2b',
-                borderRadius: '8px',
-                marginTop: '8px',
-                width: '250px',
-                maxHeight: '80vh',
-                overflowY: 'auto',
-                '&::-webkit-scrollbar': {
-                  width: '4px',
-                },
-                '&::-webkit-scrollbar-thumb': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  borderRadius: '4px',
-                },
-              },
-            }}
-          >
-            <Box
-              sx={{
-                py: 1,
-                px: 2,
-                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-              }}
-            >
-              <Typography
-                sx={{
-                  color: '#fff',
-                  fontSize: '0.9rem',
-                  opacity: 0.7,
-                  textTransform: 'uppercase',
-                  letterSpacing: '1px',
-                }}
-              >
-                Categories
-              </Typography>
-            </Box>
-            {categories.map((category) => (
-              <MenuItem
-                key={category.documentId}
-                onClick={handleCloseNavMenu}
-                sx={{
-                  py: 1.5,
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  },
-                }}
-              >
-                <Link
-                  href={`/bangla/${category?.name}`}
-                  style={{
-                    textDecoration: 'none',
-                    color: '#fff',
-                    width: '100%',
-                    padding: '4px 16px',
-                    fontSize: '0.95rem',
-                  }}
-                >
-                  {category?.name}
-                </Link>
-              </MenuItem>
-            ))}
-          </Menu>
+            categories={categories}
+            anchorEl={anchorElNav}
+          />
 
           {/* Desktop Menu */}
           <Box
@@ -292,74 +228,17 @@ const ResponsiveAppBar = () => {
           {/* User Menu */}
           <Box sx={{ flexGrow: 0 }}>
             {user ? (
-              <>
-                <Tooltip title="Open settings">
-                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                    <Avatar
-                      alt={user.displayName || 'User'}
-                      src={user.photoURL || ''}
-                      sx={{
-                        width: { xs: 35, md: 40 },
-                        height: { xs: 35, md: 40 },
-                        border: '2px solid rgba(255, 255, 255, 0.2)',
-                      }}
-                    />
-                  </IconButton>
-                </Tooltip>
-                <Menu
-                  sx={{
-                    mt: '45px',
-                    '& .MuiPaper-root': {
-                      backgroundColor: '#001f2b',
-                      borderRadius: '8px',
-                      minWidth: '200px',
-                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                    },
-                  }}
-                  anchorEl={anchorElUser}
-                  anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-                  open={Boolean(anchorElUser)}
-                  onClose={handleCloseUserMenu}
-                  TransitionComponent={Fade}
-                >
-                  {settings.map((setting) => (
-                    <MenuItem
-                      key={setting}
-                      onClick={
-                        setting === 'Logout'
-                          ? handleLogout
-                          : handleCloseUserMenu
-                      }
-                      sx={{
-                        color: '#fff',
-                        '&:hover': {
-                          backgroundColor:
-                            setting === 'Logout'
-                              ? 'rgba(255, 0, 0, 0.1)'
-                              : 'rgba(255, 255, 255, 0.1)',
-                        },
-                      }}
-                    >
-                      <Typography
-                        sx={{
-                          textAlign: 'center',
-                          color: setting === 'Logout' ? '#ff4d4d' : '#fff',
-                        }}
-                      >
-                        {setting}
-                      </Typography>
-                    </MenuItem>
-                  ))}
-                </Menu>
-              </>
+              <CustomDropdown
+                items={dropdownItems}
+                trigger={
+                  <CustomAvatar
+                    alt={user.displayName || 'User'}
+                    src={user.photoURL || ''}
+                    size={isMobile ? 'small' : 'medium'}
+                  />
+                }
+                mobileView={isMobile}
+              />
             ) : (
               <Button
                 variant="contained"
