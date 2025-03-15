@@ -94,10 +94,10 @@ export default function AdminDashboardLayout({
   const theme = useTheme()
   const { user, logout } = useAuth()
   const pathname = usePathname()
-  
+
   // Check if the screen is larger than 'md' breakpoint
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('md'))
-  
+
   // State for drawer open/close
   const [open, setOpen] = useState(isLargeScreen)
 
@@ -145,83 +145,98 @@ export default function AdminDashboardLayout({
           </Typography>
           {user && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' } }}>
+              <Typography
+                variant="body2"
+                sx={{ display: { xs: 'none', sm: 'block' } }}
+              >
                 {user.displayName || 'Admin User'}
               </Typography>
-              <Avatar 
-                alt={user.displayName || 'Admin User'} 
-                src={user.photoURL || ''} 
-                sx={{ width: 35, height: 35, border: '1px solid rgba(255, 255, 255, 0.2)' }}
+              <Avatar
+                alt={user.displayName || 'Admin User'}
+                src={user.photoURL || ''}
+                sx={{
+                  width: 35,
+                  height: 35,
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                }}
               />
             </Box>
           )}
         </Toolbar>
       </AppBar>
-      
+
       <StyledDrawer
-        variant={isLargeScreen ? "permanent" : "temporary"}
+        variant={isLargeScreen ? 'permanent' : 'temporary'}
         open={open}
         onClose={handleDrawerClose}
       >
         <DrawerHeader>
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              flexGrow: 1, 
+          <Typography
+            variant="h6"
+            sx={{
+              flexGrow: 1,
               ml: 2,
               background: 'linear-gradient(45deg, #FFF 30%, #E3F2FD 90%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              fontWeight: 700
+              fontWeight: 700,
             }}
           >
             YOUTHMEDIA24
           </Typography>
           <IconButton onClick={handleDrawerClose} sx={{ color: '#fff' }}>
-            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+            {theme.direction === 'ltr' ? (
+              <ChevronLeftIcon />
+            ) : (
+              <ChevronRightIcon />
+            )}
           </IconButton>
         </DrawerHeader>
-        
+
         <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)' }} />
-        
+
         <List>
           {navItems.map((item) => (
-            <Link 
-              href={`/admin-dashboard${item.path}`} 
+            <Link
+              href={item.path}
               key={item.text}
               style={{ textDecoration: 'none', color: 'inherit' }}
             >
-              <ListItem 
-                disablePadding 
+              <ListItem
+                disablePadding
                 onClick={handleDrawerClose}
                 sx={{
-                  backgroundColor: isActive(item.path) ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                  backgroundColor: isActive(item.path)
+                    ? 'rgba(255, 255, 255, 0.1)'
+                    : 'transparent',
                   '&:hover': {
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                   },
                 }}
               >
                 <ListItemButton>
-                  <ListItemIcon sx={{ color: isActive(item.path) ? '#4fc3f7' : '#fff' }}>
+                  <ListItemIcon
+                    sx={{ color: isActive(item.path) ? '#4fc3f7' : '#fff' }}
+                  >
                     {item.icon}
                   </ListItemIcon>
-                  <ListItemText 
-                    primary={item.text} 
-                    sx={{ 
+                  <ListItemText
+                    primary={item.text}
+                    sx={{
                       color: isActive(item.path) ? '#4fc3f7' : '#fff',
                       '& .MuiTypography-root': {
                         fontWeight: isActive(item.path) ? 600 : 400,
-                      }
-                    }} 
+                      },
+                    }}
                   />
                 </ListItemButton>
               </ListItem>
             </Link>
           ))}
         </List>
-        
+
         <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)', mt: 'auto' }} />
-        
+
         <List>
           <ListItem disablePadding onClick={handleLogout}>
             <ListItemButton>
@@ -233,7 +248,7 @@ export default function AdminDashboardLayout({
           </ListItem>
         </List>
       </StyledDrawer>
-      
+
       <Box
         component="main"
         sx={{
