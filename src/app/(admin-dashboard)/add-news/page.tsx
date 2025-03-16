@@ -226,7 +226,17 @@ export default function AddNewsPage() {
       })
 
       // Reset form
-      reset()
+      reset({
+        title: '',
+        description: '',
+        content: '',
+        category: '',
+        newsStatus: 'draft',
+        isTreanding: false,
+        coverFiles: null,
+        newsImageFiles: null,
+      })
+
       setCoverPreview(null)
       setNewsImagePreviews([])
     } catch (error) {

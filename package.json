@@ -26,10 +26,12 @@
     "@tiptap/extension-link": "^2.11.5",
     "@tiptap/extension-placeholder": "^2.11.5",
     "@tiptap/extension-text-align": "^2.11.5",
+    "@tiptap/extension-text-style": "^2.11.5",
     "@tiptap/extension-underline": "^2.11.5",
     "@tiptap/extension-youtube": "^2.11.5",
     "@tiptap/react": "^2.11.5",
     "@tiptap/starter-kit": "^2.11.5",
+    "@tiptap/suggestion": "^2.11.5",
     "cookies-next": "^5.1.0",
     "dayjs": "^1.11.13",
     "dayjs-plugin-utc": "^0.1.2",
@@ -40,7 +42,7 @@
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.54.2",
-    "react-quill": "^2.0.0",
+    "tippy.js": "^6.3.7",
     "zustand": "^5.0.0"
   },
   "devDependencies": {

@@ -13,7 +13,9 @@ import Placeholder from '@tiptap/extension-placeholder'
 import Heading from '@tiptap/extension-heading'
 import CodeBlock from '@tiptap/extension-code-block'
 import Color from '@tiptap/extension-color'
+import TextStyle from '@tiptap/extension-text-style'
 import Highlight from '@tiptap/extension-highlight'
+import SlashCommand from './SlashCommand'
 
 import {
   Box,
@@ -223,10 +225,12 @@ export default function TiptapEditor({
         levels: [1, 2, 3, 4, 5, 6],
       }),
       CodeBlock,
+      TextStyle,
       Color,
       Highlight.configure({
         multicolor: true,
       }),
+      SlashCommand,
     ],
     content: value || '<p></p>',
     onUpdate: ({ editor }: EditorUpdateEvent) => {
@@ -538,23 +542,27 @@ export default function TiptapEditor({
 
         {/* History */}
         <Tooltip title="Undo">
-          <IconButton
-            size="small"
-            onClick={() => editor.chain().focus().undo().run()}
-            disabled={!editor.can().undo()}
-          >
-            <UndoIcon fontSize="small" />
-          </IconButton>
+          <span>
+            <IconButton
+              size="small"
+              onClick={() => editor.chain().focus().undo().run()}
+              disabled={!editor.can().undo()}
+            >
+              <UndoIcon fontSize="small" />
+            </IconButton>
+          </span>
         </Tooltip>
 
         <Tooltip title="Redo">
-          <IconButton
-            size="small"
-            onClick={() => editor.chain().focus().redo().run()}
-            disabled={!editor.can().redo()}
-          >
-            <RedoIcon fontSize="small" />
-          </IconButton>
+          <span>
+            <IconButton
+              size="small"
+              onClick={() => editor.chain().focus().redo().run()}
+              disabled={!editor.can().redo()}
+            >
+              <RedoIcon fontSize="small" />
+            </IconButton>
+          </span>
         </Tooltip>
 
         <GroupDivider orientation="vertical" flexItem />
