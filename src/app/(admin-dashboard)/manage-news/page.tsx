@@ -54,6 +54,8 @@ export default function ManageNewsPage() {
     deleteArticle,
     publishArticle,
     unpublishArticle,
+    fetchArticleByDocumentId,
+    specificArticle,
   } = useArticleStore()
 
   // State for articles and pagination
@@ -84,6 +86,9 @@ export default function ManageNewsPage() {
     message: '',
     severity: 'success' as 'success' | 'error',
   })
+
+  // State for view article modal
+  const [viewModalOpen, setViewModalOpen] = useState(false);
 
   // Fetch categories and articles on component mount
   useEffect(() => {
@@ -214,12 +219,15 @@ export default function ManageNewsPage() {
   }
 
   // Handle view article
-  const handleViewArticle = (id: string, locale: string, slug?: string) => {
-    if (locale === 'bn' && slug) {
-      window.open(`/bangla/all/${slug}`, '_blank')
-    } else {
-      window.open(`/english/all/${id}`, '_blank')
-    }
+  const handleViewArticle = (id: string) => {
+    // Fetch the article details
+    fetchArticleByDocumentId(id);
+    setViewModalOpen(true);
+  }
+
+  // Handle close view modal
+  const handleCloseViewModal = () => {
+    setViewModalOpen(false);
   }
 
   // Handle add new article
@@ -472,9 +480,7 @@ export default function ManageNewsPage() {
                               color="primary"
                               onClick={() =>
                                 handleViewArticle(
-                                  article.documentId,
-                                  article.locale
-                                  // article?.banglaSlug
+                                  article.documentId
                                 )
                               }
                             >
@@ -611,6 +617,152 @@ export default function ManageNewsPage() {
               'Unpublish'
             )}
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* View Article Modal */}
+      <Dialog
+        open={viewModalOpen}
+        onClose={handleCloseViewModal}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          <Typography variant="h6" component="div" fontWeight="bold">
+            Article Details
+          </Typography>
+        </DialogTitle>
+        <DialogContent dividers>
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+              <CircularProgress />
+            </Box>
+          ) : specificArticle ? (
+            <Box>
+              {/* Cover Image */}
+              {specificArticle.cover && specificArticle.cover.length > 0 && (
+                <Box sx={{ position: 'relative', height: 300, mb: 3 }}>
+                  <Image
+                    src={specificArticle.cover[0].url}
+                    alt={specificArticle.title}
+                    fill
+                    style={{ objectFit: 'cover', borderRadius: '8px' }}
+                  />
+                </Box>
+              )}
+
+              {/* Title and Meta Info */}
+              <Typography variant="h5" gutterBottom fontWeight="bold">
+                {specificArticle.title}
+              </Typography>
+
+              <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+                <Chip 
+                  label={specificArticle.category?.name || 'Uncategorized'} 
+                  size="small" 
+                  color="primary" 
+                  variant="outlined" 
+                />
+                <Chip 
+                  label={specificArticle.locale === 'bn' ? 'Bengali' : 'English'} 
+                  size="small" 
+                  variant="outlined" 
+                />
+                <Chip 
+                  label={`Status: ${specificArticle.newsStatus || 'Draft'}`} 
+                  size="small" 
+                  color={specificArticle.newsStatus === 'published' ? 'success' : 'default'} 
+                  variant="outlined" 
+                />
+                {specificArticle.isTreanding && (
+                  <Chip 
+                    label="Trending" 
+                    size="small" 
+                    color="error" 
+                    variant="outlined" 
+                  />
+                )}
+              </Box>
+
+              <Box sx={{ display: 'flex', gap: 3, mb: 3, color: 'text.secondary', fontSize: '0.875rem' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Typography variant="body2">
+                    Created: {formatDate(specificArticle.createdAt)}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Typography variant="body2">
+                    Updated: {formatDate(specificArticle.updatedAt)}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Typography variant="body2">
+                    Views: {specificArticle.views || 0}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Typography variant="body2">
+                    Likes: {specificArticle.likes || 0}
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Description */}
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Description
+              </Typography>
+              <Typography variant="body1" paragraph>
+                {specificArticle.description}
+              </Typography>
+
+              {/* Content */}
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Content
+              </Typography>
+              <Paper 
+                sx={{ 
+                  p: 2, 
+                  maxHeight: '300px', 
+                  overflow: 'auto', 
+                  bgcolor: '#f9f9f9',
+                  borderRadius: '8px' 
+                }}
+              >
+                <div dangerouslySetInnerHTML={{ __html: specificArticle.newsContent || '' }} />
+              </Paper>
+            </Box>
+          ) : (
+            <Typography color="error">Failed to load article details</Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseViewModal}>Close</Button>
+          {specificArticle && (
+            <Button 
+              color="primary" 
+              onClick={() => {
+                handleCloseViewModal();
+                handleEditArticle(specificArticle.documentId);
+              }}
+            >
+              Edit Article
+            </Button>
+          )}
+          {specificArticle && specificArticle.locale === 'bn' && specificArticle.banglaSlug ? (
+            <Button 
+              color="primary" 
+              onClick={() => window.open(`/bangla/all/${specificArticle.banglaSlug}`, '_blank')}
+            >
+              Open in Browser
+            </Button>
+          ) : specificArticle && (
+            <Button 
+              color="primary" 
+              onClick={() => window.open(`/english/all/${specificArticle.documentId}`, '_blank')}
+            >
+              Open in Browser
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
 

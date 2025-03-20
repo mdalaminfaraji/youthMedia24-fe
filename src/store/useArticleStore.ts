@@ -59,6 +59,7 @@ export interface Comment {
   }
 }
 export interface NewsDetails {
+  views: number
   documentId: string
   description: string
   banglaSlug: string
@@ -250,7 +251,7 @@ export const useArticleStore = create<ArticleStore>((set, get) => ({
       set({ error: err.message, loading: false })
     }
   },
-  
+
   fetchAdminArticles: async (locale?: string) => {
     set({ loading: true, error: null })
     const currentLocale = locale || get().locale
@@ -286,21 +287,21 @@ export const useArticleStore = create<ArticleStore>((set, get) => ({
       set({ error: err.message, loading: false })
     }
   },
-  
+
   deleteArticle: async (documentId: string) => {
     set({ loading: true, error: null })
-    
+
     try {
       await apolloClient.mutate({
         mutation: DELETE_ARTICLE_MUTATION,
         variables: { documentId },
       })
-      
+
       // Update the admin articles list after deletion
       const updatedArticles = get().adminArticles.filter(
-        article => article.documentId !== documentId
+        (article) => article.documentId !== documentId
       )
-      
+
       set({ adminArticles: updatedArticles, loading: false })
       return true
     } catch (err: any) {
@@ -308,24 +309,24 @@ export const useArticleStore = create<ArticleStore>((set, get) => ({
       return false
     }
   },
-  
+
   publishArticle: async (documentId: string) => {
     set({ loading: true, error: null })
-    
+
     try {
       await apolloClient.mutate({
         mutation: PUBLISH_ARTICLE_MUTATION,
         variables: { documentId },
       })
-      
+
       // Update the article status in the local state
-      const updatedArticles = get().adminArticles.map(article => {
+      const updatedArticles = get().adminArticles.map((article) => {
         if (article.documentId === documentId) {
           return { ...article, newsStatus: 'published' }
         }
         return article
       })
-      
+
       set({ adminArticles: updatedArticles, loading: false })
       return true
     } catch (err: any) {
@@ -333,29 +334,29 @@ export const useArticleStore = create<ArticleStore>((set, get) => ({
       return false
     }
   },
-  
+
   unpublishArticle: async (documentId: string) => {
     set({ loading: true, error: null })
-    
+
     try {
       await apolloClient.mutate({
         mutation: UNPUBLISH_ARTICLE_MUTATION,
         variables: { documentId },
       })
-      
+
       // Update the article status in the local state
-      const updatedArticles = get().adminArticles.map(article => {
+      const updatedArticles = get().adminArticles.map((article) => {
         if (article.documentId === documentId) {
           return { ...article, newsStatus: 'draft' }
         }
         return article
       })
-      
+
       set({ adminArticles: updatedArticles, loading: false })
       return true
     } catch (err: any) {
       set({ error: err.message, loading: false })
       return false
     }
-  }
+  },
 }))
