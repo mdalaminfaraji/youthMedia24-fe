@@ -30,3 +30,24 @@ export const LOGIN_MUTATION = gql`
     }
   }
 `
+export const UPDATE_USER_MUTATION = gql`
+  mutation UpdateUser($input: UsersPermissionsUpdateInput!) {
+    updateUser(input: $input) {
+      user {
+        id
+        documentId
+        email
+      }
+    }
+  }
+`
+
+export const DELETE_USER_MUTATION = gql`
+  mutation DeleteUser($documentId: ID!) {
+    deleteUser(documentId: $documentId) {
+      id
+      documentId
+      email
+    }
+  }
+`

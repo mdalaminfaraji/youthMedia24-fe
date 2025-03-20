@@ -26,6 +26,7 @@ export const GET_SINGLE_ARTICLES = gql`
       title
       description
       content
+      newsContent
       views
       likes
       banglaSlug
