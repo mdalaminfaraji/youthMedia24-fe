@@ -28,6 +28,10 @@ interface CreateCommentInput {
 }
 
 interface Article {
+  views: number
+  likes: number
+  comments: Comment[]
+  status: string
   documentId: string
   description: string
   banglaSlug: string
@@ -36,6 +40,7 @@ interface Article {
   createdAt: string
   title: string
   category: {
+    documentId: string
     name: string
   }
 }

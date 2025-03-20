@@ -82,7 +82,7 @@ const navItems = [
   { text: 'Add News', icon: <PostAddIcon />, path: '/add-news' },
   { text: 'Manage News', icon: <NewspaperIcon />, path: '/manage-news' },
   { text: 'Categories', icon: <CategoryIcon />, path: '/categories' },
-  { text: 'Users', icon: <PeopleIcon />, path: '/users' },
+  { text: 'Users', icon: <PeopleIcon />, path: '/user-management' },
   { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
 ]
 

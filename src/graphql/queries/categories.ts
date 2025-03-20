@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import { gql } from '@apollo/client'
 
 export const GET_ALL_CATEGORIES = gql`
   query Category($locale: I18NLocaleCode) {
@@ -9,4 +9,15 @@ export const GET_ALL_CATEGORIES = gql`
       locale
     }
   }
-`;
+`
+
+export const GET_CATEGORY_BY_ID = gql`
+  query CategoryById($documentId: ID!) {
+    category(documentId: $documentId) {
+      documentId
+      name
+      description
+      locale
+    }
+  }
+`
