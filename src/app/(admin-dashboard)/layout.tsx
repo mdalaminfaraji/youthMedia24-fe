@@ -28,6 +28,7 @@ import { useMediaQuery } from '@mui/material'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/providers/clientProvider/authProvider'
+import { HomeOutlined } from '@mui/icons-material'
 
 const drawerWidth = 240
 
@@ -84,6 +85,7 @@ const navItems = [
   { text: 'Categories', icon: <CategoryIcon />, path: '/categories' },
   { text: 'Users', icon: <PeopleIcon />, path: '/user-management' },
   { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
+  { text: 'Home', icon: <HomeOutlined />, path: '/' },
 ]
 
 export default function AdminDashboardLayout({
