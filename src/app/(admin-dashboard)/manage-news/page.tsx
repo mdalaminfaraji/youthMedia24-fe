@@ -29,113 +29,34 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
+  Tooltip,
 } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import SearchIcon from '@mui/icons-material/Search'
 import AddIcon from '@mui/icons-material/Add'
+import PublishIcon from '@mui/icons-material/Publish'
+import UnpublishedIcon from '@mui/icons-material/Unpublished'
 import { useCategoryStore } from '@/store/categoriesStore'
 import { useRouter } from 'next/navigation'
-
-// Mock data for news articles
-const mockArticles = [
-  {
-    id: '1',
-    title: 'Bangladesh Cricket Team Wins Series',
-    category: 'Sports',
-    categoryId: 'sports-123',
-    status: 'published',
-    author: 'Alamin Faraji',
-    publishDate: '2025-03-10T10:30:00',
-    language: 'bn',
-    views: 1245,
-  },
-  {
-    id: '2',
-    title: 'New Economic Policy Announced',
-    category: 'Business',
-    categoryId: 'business-456',
-    status: 'published',
-    author: 'Alamin Faraji',
-    publishDate: '2025-03-09T14:15:00',
-    language: 'bn',
-    views: 890,
-  },
-  {
-    id: '3',
-    title: 'Tech Innovation Summit in Dhaka',
-    category: 'Technology',
-    categoryId: 'tech-789',
-    status: 'draft',
-    author: 'Alamin Faraji',
-    publishDate: '2025-03-08T09:45:00',
-    language: 'en',
-    views: 0,
-  },
-  {
-    id: '4',
-    title: 'Cultural Festival Celebrates Heritage',
-    category: 'Culture',
-    categoryId: 'culture-101',
-    status: 'published',
-    author: 'Alamin Faraji',
-    publishDate: '2025-03-07T16:20:00',
-    language: 'bn',
-    views: 567,
-  },
-  {
-    id: '5',
-    title: 'Health Ministry Issues New Guidelines',
-    category: 'Health',
-    categoryId: 'health-112',
-    status: 'published',
-    author: 'Alamin Faraji',
-    publishDate: '2025-03-06T11:10:00',
-    language: 'bn',
-    views: 723,
-  },
-  {
-    id: '6',
-    title: 'Education Reform Plan Unveiled',
-    category: 'Education',
-    categoryId: 'education-131',
-    status: 'draft',
-    author: 'Alamin Faraji',
-    publishDate: '2025-03-05T13:40:00',
-    language: 'en',
-    views: 0,
-  },
-  {
-    id: '7',
-    title: 'Weather Alert: Heavy Rainfall Expected',
-    category: 'Weather',
-    categoryId: 'weather-415',
-    status: 'published',
-    author: 'Alamin Faraji',
-    publishDate: '2025-03-04T08:30:00',
-    language: 'bn',
-    views: 1892,
-  },
-  {
-    id: '8',
-    title: 'Local Art Exhibition Opens',
-    category: 'Arts',
-    categoryId: 'arts-161',
-    status: 'published',
-    author: 'Alamin Faraji',
-    publishDate: '2025-03-03T15:50:00',
-    language: 'bn',
-    views: 345,
-  },
-]
+import { useArticleStore } from '@/store/useArticleStore'
+import Image from 'next/image'
 
 export default function ManageNewsPage() {
   const router = useRouter()
   const { categories, fetchCategories } = useCategoryStore()
+  const {
+    adminArticles,
+    loading: storeLoading,
+    error: storeError,
+    fetchAdminArticles,
+    deleteArticle,
+    publishArticle,
+    unpublishArticle,
+  } = useArticleStore()
 
   // State for articles and pagination
-  const [articles, setArticles] = useState(mockArticles)
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(5)
   const [loading, setLoading] = useState(false)
@@ -150,6 +71,13 @@ export default function ManageNewsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [articleToDelete, setArticleToDelete] = useState<string | null>(null)
 
+  // State for publish/unpublish dialog
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false)
+  const [articleToChangeStatus, setArticleToChangeStatus] = useState<{
+    id: string
+    action: 'publish' | 'unpublish'
+  } | null>(null)
+
   // State for notifications
   const [notification, setNotification] = useState({
     open: false,
@@ -157,12 +85,11 @@ export default function ManageNewsPage() {
     severity: 'success' as 'success' | 'error',
   })
 
-  // Fetch categories on component mount
+  // Fetch categories and articles on component mount
   useEffect(() => {
     fetchCategories('bn')
-    // In a real app, you would fetch articles here
-    // For now, we're using mock data
-  }, [fetchCategories])
+    fetchAdminArticles()
+  }, [fetchCategories, fetchAdminArticles])
 
   // Handle page change
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -210,21 +137,67 @@ export default function ManageNewsPage() {
     setArticleToDelete(null)
   }
 
-  // Handle delete article
-  const handleDeleteArticle = () => {
-    setLoading(true)
+  // Handle status dialog open
+  const handleStatusDialogOpen = (
+    id: string,
+    action: 'publish' | 'unpublish'
+  ) => {
+    setArticleToChangeStatus({ id, action })
+    setStatusDialogOpen(true)
+  }
 
-    // In a real app, you would call an API to delete the article
-    setTimeout(() => {
-      setArticles(articles.filter((article) => article.id !== articleToDelete))
-      setNotification({
-        open: true,
-        message: 'Article deleted successfully',
-        severity: 'success',
-      })
-      setLoading(false)
-      handleDeleteDialogClose()
-    }, 1000)
+  // Handle status dialog close
+  const handleStatusDialogClose = () => {
+    setStatusDialogOpen(false)
+    setArticleToChangeStatus(null)
+  }
+
+  // Handle delete article
+  const handleDeleteArticle = async () => {
+    if (!articleToDelete) return
+
+    setLoading(true)
+    const success = await deleteArticle(articleToDelete)
+
+    setNotification({
+      open: true,
+      message: success
+        ? 'Article deleted successfully'
+        : 'Failed to delete article',
+      severity: success ? 'success' : 'error',
+    })
+
+    setLoading(false)
+    handleDeleteDialogClose()
+  }
+
+  // Handle change article status
+  const handleChangeArticleStatus = async () => {
+    if (!articleToChangeStatus) return
+
+    setLoading(true)
+    let success = false
+
+    if (articleToChangeStatus.action === 'publish') {
+      success = await publishArticle(articleToChangeStatus.id)
+    } else {
+      success = await unpublishArticle(articleToChangeStatus.id)
+    }
+
+    setNotification({
+      open: true,
+      message: success
+        ? `Article ${
+            articleToChangeStatus.action === 'publish'
+              ? 'published'
+              : 'unpublished'
+          } successfully`
+        : `Failed to ${articleToChangeStatus.action} article`,
+      severity: success ? 'success' : 'error',
+    })
+
+    setLoading(false)
+    handleStatusDialogClose()
   }
 
   // Handle notification close
@@ -237,14 +210,16 @@ export default function ManageNewsPage() {
 
   // Handle edit article
   const handleEditArticle = (id: string) => {
-    // In a real app, you would navigate to the edit page
-    router.push(`/admin-dashboard/edit-news/${id}`)
+    router.push(`/edit-news/${id}`)
   }
 
   // Handle view article
-  const handleViewArticle = (id: string) => {
-    // In a real app, you would navigate to the article page
-    window.open(`/article/${id}`, '_blank')
+  const handleViewArticle = (id: string, locale: string, slug?: string) => {
+    if (locale === 'bn' && slug) {
+      window.open(`/bangla/all/${slug}`, '_blank')
+    } else {
+      window.open(`/english/all/${id}`, '_blank')
+    }
   }
 
   // Handle add new article
@@ -253,16 +228,18 @@ export default function ManageNewsPage() {
   }
 
   // Filter and search articles
-  const filteredArticles = articles.filter((article) => {
+  const filteredArticles = adminArticles.filter((article) => {
     const matchesSearch = article.title
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
     const matchesCategory = filterCategory
-      ? article.categoryId === filterCategory
+      ? article.category?.documentId === filterCategory
       : true
-    const matchesStatus = filterStatus ? article.status === filterStatus : true
+    const matchesStatus = filterStatus
+      ? article.newsStatus?.toLowerCase() === filterStatus
+      : true
     const matchesLanguage = filterLanguage
-      ? article.language === filterLanguage
+      ? article.locale === filterLanguage
       : true
 
     return matchesSearch && matchesCategory && matchesStatus && matchesLanguage
@@ -386,6 +363,7 @@ export default function ManageNewsPage() {
           <Table sx={{ minWidth: 650 }}>
             <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
               <TableRow>
+                <TableCell sx={{ fontWeight: 'bold' }}>Image</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Title</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Category</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
@@ -396,73 +374,170 @@ export default function ManageNewsPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredArticles
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((article) => (
-                  <TableRow key={article.id} hover>
-                    <TableCell sx={{ maxWidth: '300px' }}>
-                      <Typography noWrap variant="body2">
-                        {article.title}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>{article.category}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={article.status}
-                        size="small"
-                        color={
-                          article.status === 'published' ? 'success' : 'default'
-                        }
-                        variant="outlined"
-                      />
-                    </TableCell>
-                    <TableCell>{formatDate(article.publishDate)}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={
-                          article.language === 'bn' ? 'Bengali' : 'English'
-                        }
-                        size="small"
-                        variant="outlined"
-                      />
-                    </TableCell>
-                    <TableCell>{article.views}</TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={() => handleViewArticle(article.id)}
-                        >
-                          <VisibilityIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={() => handleEditArticle(article.id)}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleDeleteDialogOpen(article.id)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              {filteredArticles.length === 0 && (
+              {storeLoading && (
                 <TableRow>
-                  <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                  <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
+                    <CircularProgress />
+                  </TableCell>
+                </TableRow>
+              )}
+
+              {!storeLoading && filteredArticles.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
                     <Typography variant="body1" color="text.secondary">
                       No articles found
                     </Typography>
                   </TableCell>
                 </TableRow>
               )}
+
+              {!storeLoading &&
+                filteredArticles
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((article) => (
+                    <TableRow key={article.documentId} hover>
+                      <TableCell sx={{ width: 80 }}>
+                        {article.cover && article.cover[0]?.url ? (
+                          <Box
+                            sx={{ width: 60, height: 40, position: 'relative' }}
+                          >
+                            <Image
+                              src={article.cover[0].url}
+                              alt={article.title}
+                              fill
+                              style={{ objectFit: 'cover' }}
+                            />
+                          </Box>
+                        ) : (
+                          <Box
+                            sx={{
+                              width: 60,
+                              height: 40,
+                              bgcolor: 'grey.300',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              No image
+                            </Typography>
+                          </Box>
+                        )}
+                      </TableCell>
+                      <TableCell sx={{ maxWidth: '300px' }}>
+                        <Tooltip title={article.title}>
+                          <Typography noWrap variant="body2">
+                            {article.title}
+                          </Typography>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell>
+                        {article.category?.name || 'Uncategorized'}
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={article.newsStatus}
+                          size="small"
+                          color={
+                            article.newsStatus === 'published'
+                              ? 'success'
+                              : 'default'
+                          }
+                          variant="outlined"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {formatDate(article.updatedAt || article.createdAt)}
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={
+                            article.locale === 'bn' ? 'Bengali' : 'English'
+                          }
+                          size="small"
+                          variant="outlined"
+                        />
+                      </TableCell>
+                      <TableCell>{article.views || 0}</TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          <Tooltip title="View Article">
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() =>
+                                handleViewArticle(
+                                  article.documentId,
+                                  article.locale
+                                  // article?.banglaSlug
+                                )
+                              }
+                            >
+                              <VisibilityIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Edit Article">
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() =>
+                                handleEditArticle(article.documentId)
+                              }
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          {article.newsStatus === 'draft' ? (
+                            <Tooltip title="Publish Article">
+                              <IconButton
+                                size="small"
+                                color="success"
+                                onClick={() =>
+                                  handleStatusDialogOpen(
+                                    article.documentId,
+                                    'publish'
+                                  )
+                                }
+                              >
+                                <PublishIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          ) : (
+                            <Tooltip title="Unpublish Article">
+                              <IconButton
+                                size="small"
+                                color="warning"
+                                onClick={() =>
+                                  handleStatusDialogOpen(
+                                    article.documentId,
+                                    'unpublish'
+                                  )
+                                }
+                              >
+                                <UnpublishedIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                          <Tooltip title="Delete Article">
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() =>
+                                handleDeleteDialogOpen(article.documentId)
+                              }
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))}
             </TableBody>
           </Table>
         </TableContainer>
@@ -501,6 +576,44 @@ export default function ManageNewsPage() {
         </DialogActions>
       </Dialog>
 
+      {/* Status Change Confirmation Dialog */}
+      <Dialog open={statusDialogOpen} onClose={handleStatusDialogClose}>
+        <DialogTitle>
+          {articleToChangeStatus?.action === 'publish'
+            ? 'Publish Article'
+            : 'Unpublish Article'}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to {articleToChangeStatus?.action} this
+            article?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleStatusDialogClose} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleChangeArticleStatus}
+            color={
+              articleToChangeStatus?.action === 'publish'
+                ? 'success'
+                : 'warning'
+            }
+            variant="contained"
+            disabled={loading}
+          >
+            {loading ? (
+              <CircularProgress size={24} />
+            ) : articleToChangeStatus?.action === 'publish' ? (
+              'Publish'
+            ) : (
+              'Unpublish'
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Notification Snackbar */}
       <Snackbar
         open={notification.open}
@@ -516,6 +629,17 @@ export default function ManageNewsPage() {
           {notification.message}
         </Alert>
       </Snackbar>
+
+      {/* Error Alert */}
+      {storeError && (
+        <Alert
+          severity="error"
+          sx={{ mt: 2 }}
+          onClose={() => useArticleStore.setState({ error: null })}
+        >
+          {storeError}
+        </Alert>
+      )}
     </Box>
   )
 }
