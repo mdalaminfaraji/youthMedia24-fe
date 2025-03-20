@@ -133,23 +133,23 @@ const mockArticles = [
 export default function ManageNewsPage() {
   const router = useRouter()
   const { categories, fetchCategories } = useCategoryStore()
-  
+
   // State for articles and pagination
   const [articles, setArticles] = useState(mockArticles)
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(5)
   const [loading, setLoading] = useState(false)
-  
+
   // State for filtering and searching
   const [searchTerm, setSearchTerm] = useState('')
   const [filterCategory, setFilterCategory] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
   const [filterLanguage, setFilterLanguage] = useState('')
-  
+
   // State for delete dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [articleToDelete, setArticleToDelete] = useState<string | null>(null)
-  
+
   // State for notifications
   const [notification, setNotification] = useState({
     open: false,
@@ -170,7 +170,9 @@ export default function ManageNewsPage() {
   }
 
   // Handle rows per page change
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setRowsPerPage(parseInt(event.target.value, 10))
     setPage(0)
   }
@@ -182,11 +184,9 @@ export default function ManageNewsPage() {
   }
 
   // Handle filter changes
-  const handleFilterChange = (
-    event: SelectChangeEvent<string>
-  ) => {
+  const handleFilterChange = (event: SelectChangeEvent<string>) => {
     const { name, value } = event.target as { name: string; value: string }
-    
+
     if (name === 'category') {
       setFilterCategory(value)
     } else if (name === 'status') {
@@ -194,7 +194,7 @@ export default function ManageNewsPage() {
     } else if (name === 'language') {
       setFilterLanguage(value)
     }
-    
+
     setPage(0)
   }
 
@@ -213,10 +213,10 @@ export default function ManageNewsPage() {
   // Handle delete article
   const handleDeleteArticle = () => {
     setLoading(true)
-    
+
     // In a real app, you would call an API to delete the article
     setTimeout(() => {
-      setArticles(articles.filter(article => article.id !== articleToDelete))
+      setArticles(articles.filter((article) => article.id !== articleToDelete))
       setNotification({
         open: true,
         message: 'Article deleted successfully',
@@ -249,16 +249,22 @@ export default function ManageNewsPage() {
 
   // Handle add new article
   const handleAddNewArticle = () => {
-    router.push('/admin-dashboard/add-news')
+    router.push('/add-news')
   }
 
   // Filter and search articles
-  const filteredArticles = articles.filter(article => {
-    const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = filterCategory ? article.categoryId === filterCategory : true
+  const filteredArticles = articles.filter((article) => {
+    const matchesSearch = article.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+    const matchesCategory = filterCategory
+      ? article.categoryId === filterCategory
+      : true
     const matchesStatus = filterStatus ? article.status === filterStatus : true
-    const matchesLanguage = filterLanguage ? article.language === filterLanguage : true
-    
+    const matchesLanguage = filterLanguage
+      ? article.language === filterLanguage
+      : true
+
     return matchesSearch && matchesCategory && matchesStatus && matchesLanguage
   })
 
@@ -274,11 +280,18 @@ export default function ManageNewsPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 4,
+        }}
+      >
         <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
           Manage News Articles
         </Typography>
-        
+
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -287,16 +300,23 @@ export default function ManageNewsPage() {
             backgroundColor: '#00141A',
             '&:hover': {
               backgroundColor: '#002a3a',
-            }
+            },
           }}
         >
           Add New Article
         </Button>
       </Box>
-      
+
       {/* Search and Filters */}
       <Paper sx={{ p: 2, mb: 3, borderRadius: 2 }}>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 2,
+            alignItems: 'center',
+          }}
+        >
           <TextField
             label="Search Articles"
             variant="outlined"
@@ -312,7 +332,7 @@ export default function ManageNewsPage() {
               ),
             }}
           />
-          
+
           <FormControl size="small" sx={{ minWidth: '150px' }}>
             <InputLabel>Category</InputLabel>
             <Select
@@ -329,7 +349,7 @@ export default function ManageNewsPage() {
               ))}
             </Select>
           </FormControl>
-          
+
           <FormControl size="small" sx={{ minWidth: '120px' }}>
             <InputLabel>Status</InputLabel>
             <Select
@@ -343,7 +363,7 @@ export default function ManageNewsPage() {
               <MenuItem value="draft">Draft</MenuItem>
             </Select>
           </FormControl>
-          
+
           <FormControl size="small" sx={{ minWidth: '120px' }}>
             <InputLabel>Language</InputLabel>
             <Select
@@ -359,7 +379,7 @@ export default function ManageNewsPage() {
           </FormControl>
         </Box>
       </Paper>
-      
+
       {/* Articles Table */}
       <Paper sx={{ width: '100%', borderRadius: 2 }}>
         <TableContainer>
@@ -390,14 +410,18 @@ export default function ManageNewsPage() {
                       <Chip
                         label={article.status}
                         size="small"
-                        color={article.status === 'published' ? 'success' : 'default'}
+                        color={
+                          article.status === 'published' ? 'success' : 'default'
+                        }
                         variant="outlined"
                       />
                     </TableCell>
                     <TableCell>{formatDate(article.publishDate)}</TableCell>
                     <TableCell>
                       <Chip
-                        label={article.language === 'bn' ? 'Bengali' : 'English'}
+                        label={
+                          article.language === 'bn' ? 'Bengali' : 'English'
+                        }
                         size="small"
                         variant="outlined"
                       />
@@ -452,25 +476,23 @@ export default function ManageNewsPage() {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
-      
+
       {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={deleteDialogOpen}
-        onClose={handleDeleteDialogClose}
-      >
+      <Dialog open={deleteDialogOpen} onClose={handleDeleteDialogClose}>
         <DialogTitle>Delete Article</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete this article? This action cannot be undone.
+            Are you sure you want to delete this article? This action cannot be
+            undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDeleteDialogClose} color="primary">
             Cancel
           </Button>
-          <Button 
-            onClick={handleDeleteArticle} 
-            color="error" 
+          <Button
+            onClick={handleDeleteArticle}
+            color="error"
             variant="contained"
             disabled={loading}
           >
@@ -478,7 +500,7 @@ export default function ManageNewsPage() {
           </Button>
         </DialogActions>
       </Dialog>
-      
+
       {/* Notification Snackbar */}
       <Snackbar
         open={notification.open}

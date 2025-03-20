@@ -59,6 +59,7 @@ export interface NewsDetails {
   title: string
   likes: number
   content: any
+  newsContent: any
   category: {
     name: string
   }

@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import {
   Box,
@@ -21,28 +22,16 @@ import {
   CircularProgress,
   Alert,
   Snackbar,
-  Divider,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   FormHelperText,
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import DeleteIcon from '@mui/icons-material/Delete'
-import ImageIcon from '@mui/icons-material/Image'
-import VideocamIcon from '@mui/icons-material/Videocam'
-import FormatBoldIcon from '@mui/icons-material/FormatBold'
-import FormatItalicIcon from '@mui/icons-material/FormatItalic'
-import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined'
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
-import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered'
-import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
-import TitleIcon from '@mui/icons-material/Title'
 import { useCategoryStore } from '@/store/categoriesStore'
 import TiptapEditor from './TiptapEditor'
+import { CREATE_ARTICLE_MUTATION } from '@/graphql/mutation/article'
+import apolloClient from '@/lib/apolloClient'
+// import { useRouter } from 'next/navigation'
 
 // Styled components
 const StyledPaper = styled(Paper)(({ theme }) => ({
@@ -83,12 +72,13 @@ const MediaPreview = styled(Card)(({ theme }) => ({
 interface NewsFormData {
   title: string
   description: string
-  content: string
+  newsContent: string
   category: string
   newsStatus: string
   isTreanding: boolean
   coverFiles: FileList | null
   newsImageFiles: FileList | null
+  locale: string
 }
 
 // Main component
@@ -102,6 +92,7 @@ export default function AddNewsPage() {
     message: '',
     severity: 'success' as 'success' | 'error',
   })
+  // const router = useRouter()
 
   // Get categories from store
   const { categories, fetchCategories } = useCategoryStore()
@@ -118,23 +109,25 @@ export default function AddNewsPage() {
     defaultValues: {
       title: '',
       description: '',
-      content: '',
+      newsContent: '',
       category: '',
       newsStatus: 'draft',
       isTreanding: false,
       coverFiles: null,
       newsImageFiles: null,
+      locale: 'en',
     },
   })
 
-  // Watch for file changes
+  // Get watched values
   const coverFiles = watch('coverFiles')
   const newsImageFiles = watch('newsImageFiles')
+  const locale = watch('locale')
 
-  // Fetch categories on mount
+  // Fetch categories on mount or when locale changes
   useEffect(() => {
-    fetchCategories('bn')
-  }, [fetchCategories])
+    fetchCategories(locale)
+  }, [fetchCategories, locale])
 
   // Update cover preview when file changes
   useEffect(() => {
@@ -183,40 +176,76 @@ export default function AddNewsPage() {
     setCoverPreview(null)
   }
 
+  // Upload file to Strapi
+  const uploadFileToStrapi = async (file: File): Promise<string> => {
+    const formData = new FormData()
+    formData.append('files', file)
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error('Failed to upload file')
+      }
+
+      const data = await response.json()
+      return data[0].id // Return the file ID
+    } catch (error) {
+      console.error('Error uploading to Strapi:', error)
+      throw error
+    }
+  }
+
   // Form submission handler
   const onSubmit = async (data: NewsFormData) => {
     setIsSubmitting(true)
+    console.log('Form data:', data)
 
     try {
-      // Log form data to console for testing
-      console.log('Form submitted:', data)
+      // Upload cover image to Strapi
+      let coverId = null
+      if (data.coverFiles && data.coverFiles.length > 0) {
+        coverId = await uploadFileToStrapi(data.coverFiles[0])
+      }
 
-      // Here you would normally send the data to your API
-      // For example:
-      // const formData = new FormData();
-      // formData.append('title', data.title);
-      // formData.append('description', data.description);
-      // formData.append('content', data.content);
-      // formData.append('category', data.category);
-      // formData.append('newsStatus', data.newsStatus);
-      // formData.append('isTreanding', String(data.isTreanding));
+      // Upload news images to Strapi
+      let newsImageIds: string[] = []
+      if (data.newsImageFiles && data.newsImageFiles.length > 0) {
+        const uploadPromises = Array.from(data.newsImageFiles).map((file) =>
+          uploadFileToStrapi(file)
+        )
+        newsImageIds = await Promise.all(uploadPromises)
+      }
 
-      // if (data.coverFiles && data.coverFiles.length > 0) {
-      //   formData.append('cover', data.coverFiles[0]);
-      // }
+      // Prepare variables for GraphQL mutation
+      const variables = {
+        data: {
+          title: data.title,
+          description: data.description,
+          newsContent: data.newsContent,
+          category: data.category,
+          newsStatus: data.newsStatus,
+          isTreanding: data.isTreanding,
+          cover: coverId || null,
+          newsImages: newsImageIds.join(',') || null,
+        },
+        locale: data.locale,
+        status: 'PUBLISHED',
+      }
 
-      // if (data.newsImageFiles) {
-      //   Array.from(data.newsImageFiles).forEach(file => {
-      //     formData.append('newsImages', file);
-      //   });
-      // }
+      // Execute GraphQL mutation
+      const response = await apolloClient.mutate({
+        mutation: CREATE_ARTICLE_MUTATION,
+        variables,
+      })
 
-      // const response = await fetch('/api/news', {
-      //   method: 'POST',
-      //   body: formData
-      // });
-
-      // if (!response.ok) throw new Error('Failed to submit news');
+      console.log('Article created:', response.data)
 
       // Success notification
       setSnackbar({
@@ -229,16 +258,22 @@ export default function AddNewsPage() {
       reset({
         title: '',
         description: '',
-        content: '',
+        newsContent: '',
         category: '',
         newsStatus: 'draft',
         isTreanding: false,
         coverFiles: null,
         newsImageFiles: null,
+        locale: data.locale,
       })
 
       setCoverPreview(null)
       setNewsImagePreviews([])
+
+      // Redirect to articles list after successful creation
+      // setTimeout(() => {
+      //   router.push('/articles')
+      // }, 2000)
     } catch (error) {
       console.error('Error submitting form:', error)
       setSnackbar({
@@ -306,15 +341,18 @@ export default function AddNewsPage() {
 
               {/* Content Editor */}
               <Controller
-                name="content"
+                name="newsContent"
                 control={control}
                 rules={{ required: 'Content is required' }}
                 render={({ field }) => (
                   <>
-                    <TiptapEditor value={field.value} onChange={field.onChange} />
-                    {errors.content && (
+                    <TiptapEditor
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                    {errors.newsContent && (
                       <FormHelperText error>
-                        {errors.content.message}
+                        {errors.newsContent.message}
                       </FormHelperText>
                     )}
                   </>
@@ -327,6 +365,29 @@ export default function AddNewsPage() {
           <Grid item xs={12} md={4}>
             <StyledPaper>
               <SectionTitle variant="h6">Publishing Options</SectionTitle>
+
+              {/* Language Selector */}
+              <Controller
+                name="locale"
+                control={control}
+                rules={{ required: 'Language is required' }}
+                render={({ field }) => (
+                  <FormControl
+                    fullWidth
+                    margin="normal"
+                    error={!!errors.locale}
+                  >
+                    <InputLabel>Language</InputLabel>
+                    <Select {...field} label="Language">
+                      <MenuItem value="en">English</MenuItem>
+                      <MenuItem value="bn">Bangla</MenuItem>
+                    </Select>
+                    {errors.locale && (
+                      <FormHelperText>{errors.locale.message}</FormHelperText>
+                    )}
+                  </FormControl>
+                )}
+              />
 
               {/* Category */}
               <Controller

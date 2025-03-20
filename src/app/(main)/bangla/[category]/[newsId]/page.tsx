@@ -357,13 +357,18 @@ const NewsDetailsPage = async ({ params }: PageProps) => {
               </Box>
             )}
 
-            {newsData?.content && (
+            {newsData?.content ? (
               <Box
                 sx={{ fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.8 }}
               >
                 <BlockRendererClient content={newsData?.content} />
               </Box>
-            )}
+            ) : newsData?.newsContent ? (
+              <Box
+                sx={{ fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.8 }}
+                dangerouslySetInnerHTML={{ __html: newsData.newsContent }}
+              />
+            ) : null}
           </Paper>
           <CommentsSection newsData={newsData} />
         </Box>

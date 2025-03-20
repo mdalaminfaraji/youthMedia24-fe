@@ -2,7 +2,7 @@
 const nextConfig = {
   output: 'standalone',
   images: {
-    domains: ['localhost', 'i.ibb.co'],
+    domains: ['localhost', 'i.ibb.co', 'res.cloudinary.com'],
     remotePatterns: [
       {
         protocol: 'http',
