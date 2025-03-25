@@ -143,7 +143,6 @@ const NewsDetailsPage = async ({ params }: PageProps) => {
     decodedCategory
   )
   const newsData: NewsDetails = await newsDetailsData(decodedNewsId)
-  console.log(newsData)
 
   const mostViewsData: MostViewsArticles[] = await MostViewsArticles()
 
