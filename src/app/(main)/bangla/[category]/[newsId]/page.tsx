@@ -13,7 +13,6 @@ import {
 } from '@mui/material'
 import { Facebook, Twitter, WhatsApp, Email } from '@mui/icons-material'
 import CommentsSection from '@/components/news/CommentsSection'
-
 import BlockRendererClient from '@/components/BlockRenderer'
 import ShareButton from '@/components/news/ShareButton'
 import { Container } from '@mui/material'
@@ -31,6 +30,7 @@ import {
 import Link from 'next/link'
 import { formateDate } from '@/utils/urlHelper'
 import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 
 type PageParams = {
   category: string
@@ -45,6 +45,7 @@ type Props = {
 }
 
 type PageProps = Props
+
 interface MostViewsArticles {
   documentId: string
   views: number
@@ -55,38 +56,60 @@ interface MostViewsArticles {
   }
   cover: Cover[]
 }
+
 const RelatedNews = async (category: string) => {
-  const { data } = await apolloClient.query({
-    query: GET_ARTICLES_WITH_SPECIFIC_CATEGORY,
-    variables: {
-      locale: 'bn',
-      filters: {
-        category: {
-          name: {
-            containsi: category,
+  try {
+    const { data } = await apolloClient.query({
+      query: GET_ARTICLES_WITH_SPECIFIC_CATEGORY,
+      variables: {
+        locale: 'bn',
+        filters: {
+          category: {
+            name: {
+              eq: category,
+            },
           },
         },
       },
-    },
-  })
-  return data.articles
+    })
+    return data?.articles || []
+  } catch (error) {
+    console.error('Error fetching related news:', error)
+    return []
+  }
 }
+
 const newsDetailsData = async (documentId: string) => {
-  const { data } = await apolloClient.query({
-    query: GET_SINGLE_ARTICLES,
-    variables: { documentId },
-  })
-  return data?.article
+  try {
+    const { data } = await apolloClient.query({
+      query: GET_SINGLE_ARTICLES,
+      variables: { documentId },
+    })
+    if (!data?.article) {
+      notFound()
+    }
+    return data?.article
+  } catch (error) {
+    console.error('Error fetching news details:', error)
+    notFound()
+  }
 }
+
 const MostViewsArticles = async () => {
-  const { data } = await apolloClient.query({
-    query: GET_MOST_VIEWED_ARTICLES,
-    variables: {
-      locale: 'bn',
-    },
-  })
-  return data.articles
+  try {
+    const { data } = await apolloClient.query({
+      query: GET_MOST_VIEWED_ARTICLES,
+      variables: {
+        locale: 'bn',
+      },
+    })
+    return data?.articles || []
+  } catch (error) {
+    console.error('Error fetching most viewed articles:', error)
+    return []
+  }
 }
+
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
@@ -114,12 +137,12 @@ const NewsDetailsPage = async ({ params }: PageProps) => {
   const { category, newsId } = resolvedParams
   const decodedCategory = decodeURIComponent(category)
   const decodedNewsId = decodeURIComponent(newsId)
+  console.log(decodedCategory)
   console.log(decodedNewsId)
   const relatedNewsData: SpecificArticleByCategory[] = await RelatedNews(
     decodedCategory
   )
   const newsData: NewsDetails = await newsDetailsData(decodedNewsId)
-  console.log(newsData)
 
   const mostViewsData: MostViewsArticles[] = await MostViewsArticles()
 
