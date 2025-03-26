@@ -137,8 +137,6 @@ const NewsDetailsPage = async ({ params }: PageProps) => {
   const { category, newsId } = resolvedParams
   const decodedCategory = decodeURIComponent(category)
   const decodedNewsId = decodeURIComponent(newsId)
-  console.log(decodedCategory)
-  console.log(decodedNewsId)
   const relatedNewsData: SpecificArticleByCategory[] = await RelatedNews(
     decodedCategory
   )
